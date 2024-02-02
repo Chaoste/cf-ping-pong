@@ -17,7 +17,7 @@ import { PageAppSDK } from "@contentful/app-sdk";
 import { useSDK } from "@contentful/react-apps-toolkit";
 import { useQuery } from "react-query";
 import { useNavigate, useParams } from "react-router";
-import { ChevronLeftIcon } from "@contentful/f36-icons";
+import { ArrowForwardIcon, ChevronLeftIcon } from "@contentful/f36-icons";
 import { EntryProps, Link } from "contentful-management";
 
 export const TournamentPage = () => {
@@ -118,13 +118,40 @@ export const TournamentPage = () => {
             <Subheading marginTop="spacingL">Matches</Subheading>
             <List>
               {tournament!.fields.matches["en-US"].map(
-                (matchLink: Link<"Entry">) => (
-                  <List.Item key={matchLink.sys.id}>
-                    {matches!.items.find(
-                      (match: EntryProps) => match.sys.id === matchLink.sys.id
-                    )?.fields.matchNumber["en-US"] ?? ""}
-                  </List.Item>
-                )
+                (matchLink: Link<"Entry">) => {
+                  const match = matches!.items.find(
+                    (match: EntryProps) => match.sys.id === matchLink.sys.id
+                  );
+                  const player1 = players!.items.find(
+                    (player: EntryProps) =>
+                      player.sys.id === match?.fields.player1["en-US"]?.sys.id
+                  );
+                  const player2 = players!.items.find(
+                    (player: EntryProps) =>
+                      player.sys.id === match?.fields.player2["en-US"]?.sys.id
+                  );
+                  if (!match) return null;
+                  return (
+                    <List.Item key={matchLink.sys.id}>
+                      <b>#{match.fields.matchNumber["en-US"] ?? ""}:</b>&nbsp;
+                      {player1?.fields.name["en-US"] ?? "-"} vs{" "}
+                      {player2?.fields.name["en-US"] ?? "-"}
+                      <Box marginLeft="spacingS" display="inline">
+                        <TextLink
+                          icon={<ArrowForwardIcon />}
+                          as="button"
+                          onClick={() => {
+                            sdk.navigator.openEntry(match.sys.id, {
+                              slideIn: true,
+                            });
+                          }}
+                        >
+                          Insert Results
+                        </TextLink>
+                      </Box>
+                    </List.Item>
+                  );
+                }
               )}
             </List>
           </Box>

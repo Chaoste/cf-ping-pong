@@ -22,7 +22,6 @@ import { useNavigate } from "react-router";
 import { PlayersMultiselect } from "../components/PlayersMultiselect";
 import { useMutation } from "react-query";
 import { useSDK } from "@contentful/react-apps-toolkit";
-import { Link } from "@contentful/app-sdk";
 import { PreviewMatches } from "../components/PreviewMatches";
 import { CreateTournamentFormFields } from "../types";
 
@@ -35,11 +34,6 @@ export const CreateTournamentForm = () => {
   );
 };
 
-const createMatches = (playerIds: string[]): Link<"Entry">[] => {
-  // TODO:
-  return [];
-};
-
 const CreateTournamentFormContents = () => {
   const navigate = useNavigate();
   const sdk = useSDK();
@@ -47,8 +41,42 @@ const CreateTournamentFormContents = () => {
     useFormContext<CreateTournamentFormFields>();
   const { isValid } = useFormState();
   const { mutate } = useMutation({
-    mutationFn: async (data: { name: string; players: string[] }) => {
-      const matches = createMatches(data.players);
+    mutationFn: async (data: CreateTournamentFormFields) => {
+      const matchEntries = await Promise.all(
+        data.matches.map((matching, index) =>
+          sdk.cma.entry.create(
+            { contentTypeId: "match" },
+            {
+              fields: {
+                matchNumber: {
+                  "en-US": `${index + 1}`,
+                },
+                player1: {
+                  "en-US": {
+                    sys: {
+                      type: "Link",
+                      linkType: "Entry",
+                      id: matching[0],
+                    },
+                  },
+                },
+                player2: matching[1]
+                  ? {
+                      "en-US": {
+                        sys: {
+                          type: "Link",
+                          linkType: "Entry",
+                          id: matching[1],
+                        },
+                      },
+                    }
+                  : undefined,
+              },
+            }
+          )
+        )
+      );
+
       return sdk.cma.entry.create(
         {
           contentTypeId: "tournament",
@@ -68,11 +96,11 @@ const CreateTournamentFormContents = () => {
               })),
             },
             matches: {
-              "en-US": matches.map((match) => ({
+              "en-US": matchEntries.map((matchEntry) => ({
                 sys: {
                   type: "Link",
                   linkType: "Entry",
-                  id: match.sys.id,
+                  id: matchEntry.sys.id,
                 },
               })),
             },
