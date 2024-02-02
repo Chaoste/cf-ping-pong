@@ -23,6 +23,8 @@ import { PlayersMultiselect } from "../components/PlayersMultiselect";
 import { useMutation } from "react-query";
 import { useSDK } from "@contentful/react-apps-toolkit";
 import { Link } from "@contentful/app-sdk";
+import { PreviewMatches } from "../components/PreviewMatches";
+import { CreateTournamentFormFields } from "../types";
 
 export const CreateTournamentForm = () => {
   const methods = useForm();
@@ -41,7 +43,8 @@ const createMatches = (playerIds: string[]): Link<"Entry">[] => {
 const CreateTournamentFormContents = () => {
   const navigate = useNavigate();
   const sdk = useSDK();
-  const { handleSubmit, register } = useFormContext();
+  const { handleSubmit, register } =
+    useFormContext<CreateTournamentFormFields>();
   const { isValid } = useFormState();
   const { mutate } = useMutation({
     mutationFn: async (data: { name: string; players: string[] }) => {
@@ -91,35 +94,45 @@ const CreateTournamentFormContents = () => {
   };
 
   return (
-    <Stack flexDirection="column" alignItems="flex-start" padding="spacingL">
-      <Flex gap="spacingS" alignItems="flex-start">
-        <IconButton
-          size="small"
-          variant="transparent"
-          icon={<ChevronLeftIcon variant="muted" />}
-          aria-label="Back to dashboard"
-          onClick={() => navigate("/")}
-        />
-        <Heading>Create New Tournament</Heading>
-      </Flex>
-      <Form onSubmit={handleSubmit(submitForm as any)}>
-        <FormControl>
-          <FormControl.Label isRequired>Name</FormControl.Label>
-          <TextInput
-            {...register("name", { required: true })}
-            placeholder="Name of the tournament"
+    <Form onSubmit={handleSubmit(submitForm as any)}>
+      <Stack flexDirection="column" alignItems="flex-start" padding="spacingL">
+        <Flex gap="spacingS" alignItems="flex-start">
+          <IconButton
+            size="small"
+            variant="transparent"
+            icon={<ChevronLeftIcon variant="muted" />}
+            aria-label="Back to dashboard"
+            onClick={() => navigate("/")}
           />
-        </FormControl>
-        <FormControl>
-          <FormControl.Label isRequired>Players</FormControl.Label>
-          <PlayersMultiselect />
-        </FormControl>
-        <Box marginTop="spacing2Xl">
+          <Heading>Create New Tournament</Heading>
+        </Flex>
+        <Flex alignItems="flex-start" fullWidth gap="128px" padding="spacingXl">
+          <Box>
+            <FormControl>
+              <FormControl.Label isRequired>Name</FormControl.Label>
+              <TextInput
+                {...register("name", { required: true })}
+                placeholder="Name of the tournament"
+              />
+            </FormControl>
+            <FormControl>
+              <FormControl.Label isRequired>Players</FormControl.Label>
+              <PlayersMultiselect />
+            </FormControl>
+          </Box>
+          <Box>
+            <FormControl>
+              <FormControl.Label isRequired>Matches</FormControl.Label>
+              <PreviewMatches />
+            </FormControl>
+          </Box>
+        </Flex>
+        <Box marginTop="spacing2Xl" marginLeft="spacingXl">
           <Button isDisabled={!isValid} variant="positive" type="submit">
             Create
           </Button>
         </Box>
-      </Form>
-    </Stack>
+      </Stack>
+    </Form>
   );
 };

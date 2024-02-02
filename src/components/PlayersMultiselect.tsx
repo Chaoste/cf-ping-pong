@@ -3,6 +3,7 @@ import { Multiselect } from "@contentful/f36-multiselect";
 import { useQuery } from "react-query";
 import { useSDK } from "@contentful/react-apps-toolkit";
 import { useController } from "react-hook-form";
+import { CreateTournamentFormFields } from "../types";
 
 export const PlayersMultiselect = () => {
   const sdk = useSDK();
@@ -12,9 +13,9 @@ export const PlayersMultiselect = () => {
 
   const {
     field: { onChange, onBlur, ref: inputRef, value: selectedPlayerIds },
-  } = useController({
+  } = useController<CreateTournamentFormFields, "players">({
     name: "players",
-    defaultValue: [] as string[],
+    defaultValue: [],
     rules: { required: true },
   });
 
@@ -39,6 +40,7 @@ export const PlayersMultiselect = () => {
       isLoading={isLoading}
       onBlur={onBlur}
       ref={inputRef}
+      placeholder="Select players"
     >
       {players?.items.map((player) => (
         <Multiselect.Option
