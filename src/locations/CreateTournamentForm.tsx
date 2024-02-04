@@ -24,6 +24,7 @@ import { useMutation } from "react-query";
 import { useSDK } from "@contentful/react-apps-toolkit";
 import { PreviewMatches } from "../components/PreviewMatches";
 import { CreateTournamentFormFields } from "../types";
+import { createMatchTree } from "../utils";
 
 export const CreateTournamentForm = () => {
   const methods = useForm();
@@ -42,35 +43,31 @@ const CreateTournamentFormContents = () => {
   const { isValid } = useFormState();
   const { mutate } = useMutation({
     mutationFn: async (data: CreateTournamentFormFields) => {
+      const allMatches = createMatchTree(data.matches);
       const matchEntries = await Promise.all(
-        data.matches.map((matching, index) =>
+        allMatches.map((match) =>
           sdk.cma.entry.create(
             { contentTypeId: "match" },
             {
               fields: {
                 matchNumber: {
-                  "en-US": `${index + 1}`,
+                  "en-US": match.matchNumber,
+                },
+                round: {
+                  "en-US": match.round,
+                },
+                roundMatchIndex: {
+                  "en-US": match.roundMatchIndex,
+                },
+                isUpperBracket: {
+                  "en-US": match.isUpperBracket,
                 },
                 player1: {
-                  "en-US": {
-                    sys: {
-                      type: "Link",
-                      linkType: "Entry",
-                      id: matching[0],
-                    },
-                  },
+                  "en-US": match.player1,
                 },
-                player2: matching[1]
-                  ? {
-                      "en-US": {
-                        sys: {
-                          type: "Link",
-                          linkType: "Entry",
-                          id: matching[1],
-                        },
-                      },
-                    }
-                  : undefined,
+                player2: {
+                  "en-US": match.player2,
+                },
               },
             }
           )
@@ -117,7 +114,7 @@ const CreateTournamentFormContents = () => {
     },
   });
 
-  const submitForm = (data: { name: string; players: string[] }) => {
+  const submitForm = (data: CreateTournamentFormFields) => {
     mutate(data);
   };
 

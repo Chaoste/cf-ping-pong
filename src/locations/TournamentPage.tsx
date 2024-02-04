@@ -19,6 +19,8 @@ import { useQuery } from "react-query";
 import { useNavigate, useParams } from "react-router";
 import { ArrowForwardIcon, ChevronLeftIcon } from "@contentful/f36-icons";
 import { EntryProps, Link } from "contentful-management";
+import { DoubleElimininationTree } from "../components/DoubleEliminationTree";
+import { MatchEntry, PlayerEntry, TournamentEntry } from "../types";
 
 export const TournamentPage = () => {
   const navigate = useNavigate();
@@ -124,11 +126,11 @@ export const TournamentPage = () => {
                   );
                   const player1 = players!.items.find(
                     (player: EntryProps) =>
-                      player.sys.id === match?.fields.player1["en-US"]?.sys.id
+                      player.sys.id === match?.fields.player1?.["en-US"]?.sys.id
                   );
                   const player2 = players!.items.find(
                     (player: EntryProps) =>
-                      player.sys.id === match?.fields.player2["en-US"]?.sys.id
+                      player.sys.id === match?.fields.player2?.["en-US"]?.sys.id
                   );
                   if (!match) return null;
                   return (
@@ -136,19 +138,24 @@ export const TournamentPage = () => {
                       <b>#{match.fields.matchNumber["en-US"] ?? ""}:</b>&nbsp;
                       {player1?.fields.name["en-US"] ?? "-"} vs{" "}
                       {player2?.fields.name["en-US"] ?? "-"}
-                      <Box marginLeft="spacingS" display="inline">
-                        <TextLink
-                          icon={<ArrowForwardIcon />}
-                          as="button"
-                          onClick={() => {
-                            sdk.navigator.openEntry(match.sys.id, {
-                              slideIn: true,
-                            });
-                          }}
-                        >
-                          Insert Results
-                        </TextLink>
-                      </Box>
+                      {player1 || player2 ? (
+                        <Box marginLeft="spacingS" display="inline">
+                          <TextLink
+                            icon={<ArrowForwardIcon />}
+                            as="button"
+                            onClick={() => {
+                              sdk.navigator.openEntry(match.sys.id, {
+                                slideIn: true,
+                              });
+                              // TODO: Catch response and update match state
+                            }}
+                          >
+                            Insert Results
+                          </TextLink>
+                        </Box>
+                      ) : (
+                        <></>
+                      )}
                     </List.Item>
                   );
                 }
@@ -156,6 +163,13 @@ export const TournamentPage = () => {
             </List>
           </Box>
         </>
+      )}
+      {matches?.items && players?.items && tournament && (
+        <DoubleElimininationTree
+          tournament={tournament as TournamentEntry}
+          matches={matches.items as MatchEntry[]}
+          players={players.items as PlayerEntry[]}
+        />
       )}
     </Stack>
   );
