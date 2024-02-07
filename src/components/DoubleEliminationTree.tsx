@@ -113,7 +113,6 @@ const toVisualMatch = (
     tournamentRoundText: match.fields.round["en-US"],
     startTime: null,
     state: null,
-    // TODO: href
     participants: [
       match.fields.player1?.["en-US"],
       match.fields.player2?.["en-US"],
@@ -131,11 +130,12 @@ const toVisualMatch = (
           isWinner: match.fields.winner?.["en-US"]
             ? match.fields.winner["en-US"] === !Boolean(index)
             : undefined,
-          resultText: match.fields.winner?.["en-US"]
-            ? index === 0
-              ? setsWonByPlayer1
-              : setsWonByPlayer2
-            : undefined,
+          resultText:
+            match.fields.winner?.["en-US"] !== undefined
+              ? index === 0
+                ? `${setsWonByPlayer1}`
+                : `${setsWonByPlayer2}`
+              : undefined,
         };
       }),
   };

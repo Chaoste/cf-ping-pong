@@ -4,21 +4,19 @@ import {
   Flex,
   Heading,
   IconButton,
-  List,
   Notification,
   SkeletonBodyText,
   SkeletonContainer,
   SkeletonDisplayText,
   Stack,
-  Subheading,
   TextLink,
 } from "@contentful/f36-components";
 import { PageAppSDK } from "@contentful/app-sdk";
 import { useSDK } from "@contentful/react-apps-toolkit";
 import { useQuery } from "react-query";
 import { useNavigate, useParams } from "react-router";
-import { ArrowForwardIcon, ChevronLeftIcon } from "@contentful/f36-icons";
-import { EntryProps, Link } from "contentful-management";
+import { ChevronLeftIcon } from "@contentful/f36-icons";
+import { Link } from "contentful-management";
 import { DoubleElimininationTree } from "../components/DoubleEliminationTree";
 import { MatchEntry, PlayerEntry, TournamentEntry } from "../types";
 
@@ -100,76 +98,15 @@ export const TournamentPage = () => {
           <SkeletonBodyText numberOfLines={4} />
         </SkeletonContainer>
       ) : (
-        <>
-          <Box>
-            <Subheading>Players</Subheading>
-            <List>
-              {tournament!.fields.players["en-US"].map(
-                (playerLink: Link<"Entry">) => (
-                  <List.Item key={playerLink.sys.id}>
-                    {players!.items.find(
-                      (player: EntryProps) =>
-                        player.sys.id === playerLink.sys.id
-                    )?.fields.name["en-US"] ?? ""}
-                  </List.Item>
-                )
-              )}
-            </List>
-          </Box>
-          <Box>
-            <Subheading marginTop="spacingL">Matches</Subheading>
-            <List>
-              {tournament!.fields.matches["en-US"].map(
-                (matchLink: Link<"Entry">) => {
-                  const match = matches!.items.find(
-                    (match: EntryProps) => match.sys.id === matchLink.sys.id
-                  );
-                  const player1 = players!.items.find(
-                    (player: EntryProps) =>
-                      player.sys.id === match?.fields.player1?.["en-US"]?.sys.id
-                  );
-                  const player2 = players!.items.find(
-                    (player: EntryProps) =>
-                      player.sys.id === match?.fields.player2?.["en-US"]?.sys.id
-                  );
-                  if (!match) return null;
-                  return (
-                    <List.Item key={matchLink.sys.id}>
-                      <b>#{match.fields.matchNumber["en-US"] ?? ""}:</b>&nbsp;
-                      {player1?.fields.name["en-US"] ?? "-"} vs{" "}
-                      {player2?.fields.name["en-US"] ?? "-"}
-                      {player1 || player2 ? (
-                        <Box marginLeft="spacingS" display="inline">
-                          <TextLink
-                            icon={<ArrowForwardIcon />}
-                            as="button"
-                            onClick={() => {
-                              sdk.navigator.openEntry(match.sys.id, {
-                                slideIn: true,
-                              });
-                              // TODO: Catch response and update match state
-                            }}
-                          >
-                            Insert Results
-                          </TextLink>
-                        </Box>
-                      ) : (
-                        <></>
-                      )}
-                    </List.Item>
-                  );
-                }
-              )}
-            </List>
-          </Box>
-        </>
-      )}
-      {matches?.items && players?.items && tournament && (
-        <DoubleElimininationTree
-          tournament={tournament as TournamentEntry}
-          matches={matches.items as MatchEntry[]}
-          players={players.items as PlayerEntry[]}
-        />
+        matches?.items &&
+        players?.items &&
+        tournament && (
+          <DoubleElimininationTree
+            tournament={tournament as TournamentEntry}
+            matches={matches.items as MatchEntry[]}
+            players={players.items as PlayerEntry[]}
+          />
+        )
       )}
     </Stack>
   );
