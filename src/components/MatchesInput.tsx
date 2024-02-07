@@ -7,7 +7,7 @@ import { useSDK } from "@contentful/react-apps-toolkit";
 import { useQuery } from "react-query";
 import { getPreviousPowerOfTwo } from "../utils";
 
-export const PreviewMatches = () => {
+export const MatchesInput = () => {
   const sdk = useSDK();
   const { data: players, isLoading } = useQuery("players", {
     queryFn: () => sdk.cma.entry.getMany({ query: { content_type: "player" } }),

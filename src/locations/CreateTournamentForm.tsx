@@ -22,7 +22,7 @@ import { useNavigate } from "react-router";
 import { PlayersMultiselect } from "../components/PlayersMultiselect";
 import { useMutation } from "react-query";
 import { useSDK } from "@contentful/react-apps-toolkit";
-import { PreviewMatches } from "../components/PreviewMatches";
+import { MatchesInput } from "../components/MatchesInput";
 import { CreateTournamentFormFields } from "../types";
 import { createMatchTree } from "../utils";
 
@@ -148,7 +148,7 @@ const CreateTournamentFormContents = () => {
           <Box>
             <FormControl>
               <FormControl.Label isRequired>Matches</FormControl.Label>
-              <PreviewMatches />
+              <MatchesInput />
             </FormControl>
           </Box>
         </Flex>
