@@ -11,23 +11,27 @@ import { useSDK } from "@contentful/react-apps-toolkit";
 import { PageAppSDK } from "@contentful/app-sdk";
 import { useParams } from "react-router";
 import { useQueryClient } from "react-query";
+import tokens from "@contentful/f36-tokens";
 
 const WhiteTheme = createTheme({
   textColor: { main: "#000000", highlighted: "#07090D", dark: "#3E414D" },
-  matchBackground: { wonColor: "#daebf9", lostColor: "#96c6da" },
+  matchBackground: { wonColor: tokens.green300, lostColor: tokens.blue200 },
   score: {
-    background: { wonColor: "#87b2c4", lostColor: "#87b2c4" },
-    text: { highlightedWonColor: "#7BF59D", highlightedLostColor: "#FB7E94" },
+    background: { wonColor: tokens.green200, lostColor: "white" },
+    text: {
+      highlightedWonColor: tokens.green700,
+      highlightedLostColor: tokens.red700,
+    },
   },
   border: {
-    color: "#CED1F2",
-    highlightedColor: "#da96c6",
+    color: tokens.blue200,
+    highlightedColor: tokens.purple400,
   },
-  roundHeader: { fontColor: "#000" },
-  roundHeaders: { background: "#da96c6" },
-  connectorColor: "#CED1F2",
-  connectorColorHighlight: "#da96c6",
-  svgBackground: "#FAFAFA",
+  roundHeader: { fontColor: "#FFFFFF" },
+  roundHeaders: { background: tokens.purple400 },
+  connectorColor: tokens.blue200,
+  connectorColorHighlight: tokens.purple400,
+  svgBackground: "#FFFFFF",
 });
 
 type DoubleElimininationTreeProps = {
@@ -105,6 +109,11 @@ const toVisualMatch = (
     }
   });
 
+  const hasGameFinished = match.fields.winner?.["en-US"] !== undefined;
+  const isPlayerMissing =
+    match.fields.player1?.["en-US"] === undefined ||
+    match.fields.player2?.["en-US"] === undefined;
+
   return {
     id: match.sys.id,
     name: match.fields.matchNumber["en-US"],
@@ -112,7 +121,11 @@ const toVisualMatch = (
     nextLooserMatchId: nextLoserMatch?.sys.id ?? null,
     tournamentRoundText: match.fields.round["en-US"],
     startTime: null,
-    state: null,
+    state: hasGameFinished
+      ? isPlayerMissing
+        ? "WALK_OVER"
+        : "DONE"
+      : "NO_PARTY",
     participants: [
       match.fields.player1?.["en-US"],
       match.fields.player2?.["en-US"],
