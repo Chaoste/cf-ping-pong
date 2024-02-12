@@ -5,7 +5,7 @@ import { Button } from "@contentful/f36-components";
 import { CycleIcon } from "@contentful/f36-icons";
 import { useSDK } from "@contentful/react-apps-toolkit";
 import { useQuery } from "react-query";
-import { getPreviousPowerOfTwo } from "../utils";
+import { getPreviousPowerOfTwo } from "../utils/getPreviousPowerOfTwo";
 
 export const MatchesInput = () => {
   const sdk = useSDK();

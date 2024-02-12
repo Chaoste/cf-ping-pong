@@ -24,7 +24,7 @@ import { useMutation } from "react-query";
 import { useSDK } from "@contentful/react-apps-toolkit";
 import { MatchesInput } from "../components/MatchesInput";
 import { CreateTournamentFormFields } from "../types";
-import { createMatchTree } from "../utils";
+import { createMatchTree } from "../utils/createMatchTree";
 
 export const CreateTournamentForm = () => {
   const methods = useForm();
