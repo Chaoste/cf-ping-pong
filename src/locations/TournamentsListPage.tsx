@@ -4,7 +4,7 @@ import {
   Flex,
   Heading,
   List,
-  SkeletonBodyText,
+  Skeleton,
   Stack,
   TextLink,
 } from "@contentful/f36-components";
@@ -13,14 +13,23 @@ import { useSDK } from "@contentful/react-apps-toolkit";
 import { useQuery } from "react-query";
 import { useNavigate } from "react-router";
 import { PlusIcon } from "@contentful/f36-icons";
+import { checkContentTypesReady } from "../utils/checkContentTypes";
+import { ContentTypesWarning } from "../components/ContentTypesWarning";
 
 export const TournamentsListPage = () => {
   const navigate = useNavigate();
   const sdk = useSDK<PageAppSDK>();
-  const { data: tournaments } = useQuery("tournaments", {
-    queryFn: () =>
-      sdk.cma.entry.getMany({ query: { content_type: "tournament" } }),
-  });
+  const { data: tournaments, isLoading: isLoadingTournaments } = useQuery(
+    "tournaments",
+    {
+      queryFn: () =>
+        sdk.cma.entry.getMany({ query: { content_type: "tournament" } }),
+    }
+  );
+  const { data: areContentTypesReady, isLoading: isLoadingContentTypesReady } =
+    useQuery("contentTypesReady", () => checkContentTypesReady(sdk));
+
+  const isLoading = isLoadingTournaments || isLoadingContentTypesReady;
 
   return (
     <Stack flexDirection="column" alignItems="flex-start" padding="spacingL">
@@ -30,12 +39,17 @@ export const TournamentsListPage = () => {
           startIcon={<PlusIcon />}
           onClick={() => navigate("/tournaments/create")}
           size="small"
+          isDisabled={isLoading || !areContentTypesReady}
         >
           Create
         </Button>
       </Flex>
-      {!tournaments ? (
-        <SkeletonBodyText />
+      {isLoading || tournaments === undefined ? (
+        <Skeleton.Container>
+          <Skeleton.BodyText />
+        </Skeleton.Container>
+      ) : !areContentTypesReady ? (
+        <ContentTypesWarning />
       ) : (
         <List>
           {tournaments.items.map((tournament) => (

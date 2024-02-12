@@ -5,6 +5,7 @@ import { MemoryRouter, Route, Routes, useLocation } from "react-router";
 import { TournamentsListPage } from "./TournamentsListPage";
 import { CreateTournamentForm } from "./CreateTournamentForm";
 import { TournamentPage } from "./TournamentPage";
+import { SetupContentModel } from "./SetupContentModel";
 
 interface InvocationParams {
   path: string;
@@ -32,6 +33,7 @@ const PageRoutes = () => {
   return (
     <Routes>
       <Route path="/" element={<TournamentsListPage />} />
+      <Route path="/setupContentModel" element={<SetupContentModel />} />
       <Route path="/tournaments/create" element={<CreateTournamentForm />} />
       <Route path="/tournaments/:tournamentId" element={<TournamentPage />} />
     </Routes>

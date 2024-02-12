@@ -5,9 +5,7 @@ import {
   Heading,
   IconButton,
   Notification,
-  SkeletonBodyText,
-  SkeletonContainer,
-  SkeletonDisplayText,
+  Skeleton,
   Stack,
   TextLink,
 } from "@contentful/f36-components";
@@ -72,9 +70,9 @@ export const TournamentPage = () => {
           onClick={() => navigate("/")}
         />
         {!tournament ? (
-          <SkeletonContainer svgHeight={32}>
-            <SkeletonDisplayText offsetTop={6} width={200} />
-          </SkeletonContainer>
+          <Skeleton.Container svgHeight={32}>
+            <Skeleton.DisplayText offsetTop={6} width={200} />
+          </Skeleton.Container>
         ) : (
           <Flex justifyContent="space-between" fullWidth>
             <Heading>Tournament {tournament.fields.name["en-US"]}</Heading>
@@ -94,9 +92,9 @@ export const TournamentPage = () => {
         )}
       </Flex>
       {isLoading ? (
-        <SkeletonContainer svgWidth="50%">
-          <SkeletonBodyText numberOfLines={4} />
-        </SkeletonContainer>
+        <Skeleton.Container svgWidth="50%">
+          <Skeleton.BodyText numberOfLines={4} />
+        </Skeleton.Container>
       ) : (
         matches?.items &&
         players?.items &&
