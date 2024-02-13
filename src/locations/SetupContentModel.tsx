@@ -35,6 +35,7 @@ const styles = {
     minWidth: 300,
     width: "50%",
     maxWidth: 600,
+    borderSpacing: 2,
   }),
   tableRow: css({
     "& td": {
@@ -48,7 +49,7 @@ const styles = {
     backgroundColor: tokens.colorPositive,
   }),
   tableRowWarning: css({
-    backgroundColor: tokens.colorWarning,
+    backgroundColor: tokens.red400,
   }),
 };
 
@@ -108,7 +109,7 @@ export const SetupContentModel = () => {
           <Table.Head>
             <Table.Row>
               <Table.Cell>Content Type</Table.Cell>
-              <Table.Cell>Ready</Table.Cell>
+              <Table.Cell width="160px">Ready</Table.Cell>
             </Table.Row>
           </Table.Head>
           <Table.Body>

@@ -8,12 +8,16 @@ export const checkContentTypeReady = async (
   contentTypeId: string,
   fields: string[]
 ) => {
-  const contentType = await sdk.cma.contentType.get({
-    contentTypeId,
-  });
-  return fields.every((key) =>
-    contentType.fields.find((field) => field.id === key)
-  );
+  try {
+    const contentType = await sdk.cma.contentType.get({
+      contentTypeId,
+    });
+    return fields.every((key) =>
+      contentType.fields.find((field) => field.id === key)
+    );
+  } catch {
+    return false;
+  }
 };
 
 export const checkTournamentReady = async (sdk: PageAppSDK) => {

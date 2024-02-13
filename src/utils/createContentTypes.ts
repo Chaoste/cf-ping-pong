@@ -1,21 +1,22 @@
 import { PageAppSDK } from "@contentful/app-sdk";
 
 export const createTournamentContentType = async (sdk: PageAppSDK) => {
-  await sdk.cma.contentType.createWithId(
+  const createdContentType = await sdk.cma.contentType.createWithId(
     { contentTypeId: "tournament" },
     {
       name: "Tournament",
       displayField: "name",
       fields: [
         {
-          type: "Symbol",
-          name: "Name",
-          apiName: "name",
           id: "name",
+          name: "Name",
+          type: "Symbol",
           required: true,
           localized: false,
         },
         {
+          id: "players",
+          name: "Players",
           type: "Array",
           items: {
             type: "Link",
@@ -26,13 +27,12 @@ export const createTournamentContentType = async (sdk: PageAppSDK) => {
               },
             ],
           },
-          name: "Players",
-          apiName: "players",
-          id: "players",
           required: false,
           localized: false,
         },
         {
+          id: "matches",
+          name: "Matches",
           type: "Array",
           items: {
             type: "Link",
@@ -43,37 +43,36 @@ export const createTournamentContentType = async (sdk: PageAppSDK) => {
               },
             ],
           },
-          name: "Matches",
-          apiName: "matches",
-          id: "matches",
           required: false,
           localized: false,
         },
         {
-          type: "Integer",
-          name: "Rounds",
-          apiName: "rounds",
           id: "rounds",
+          name: "Rounds",
+          type: "Integer",
           required: true,
           localized: false,
         },
       ],
     }
   );
+  await sdk.cma.contentType.publish(
+    { contentTypeId: "tournament" },
+    createdContentType
+  );
 };
 
 export const createMatchContentType = async (sdk: PageAppSDK) => {
-  await sdk.cma.contentType.createWithId(
+  const createdContentType = await sdk.cma.contentType.createWithId(
     { contentTypeId: "match" },
     {
       name: "Match",
       displayField: "matchNumber",
       fields: [
         {
-          type: "Symbol",
-          name: "Match Number",
-          apiName: "matchNumber",
           id: "matchNumber",
+          name: "Match Number",
+          type: "Symbol",
           required: true,
           localized: false,
           validations: [
@@ -89,133 +88,132 @@ export const createMatchContentType = async (sdk: PageAppSDK) => {
           ],
         },
         {
-          type: "Boolean",
-          name: "Is Upper Bracket",
-          apiName: "isUpperBracket",
           id: "isUpperBracket",
-          required: true,
-          localized: false,
-        },
-        {
-          type: "Integer",
-          name: "Round",
-          apiName: "round",
-          id: "round",
-          required: true,
-          localized: false,
-        },
-        {
-          type: "Integer",
-          name: "Round Match Index",
-          apiName: "roundMatchIndex",
-          id: "roundMatchIndex",
-          required: true,
-          localized: false,
-        },
-        {
-          type: "Link",
-          name: "Player 1",
-          apiName: "player1",
-          id: "player1",
-          required: false,
-          localized: false,
-          validations: [{ linkContentType: ["player"] }],
-        },
-        {
-          type: "Link",
-          name: "Player 2",
-          apiName: "player2",
-          id: "player2",
-          required: false,
-          localized: false,
-          validations: [{ linkContentType: ["player"] }],
-        },
-        {
-          type: "Symbol",
-          name: "Result Set 1",
-          apiName: "resultSet1",
-          id: "resultSet1",
-          required: false,
-          localized: false,
-          validations: [
-            {
-              regexp: {
-                pattern: "\\d+ - \\d+",
-                flags: "",
-              },
-            },
-          ],
-        },
-        {
-          type: "Symbol",
-          name: "Result Set 2",
-          apiName: "resultSet2",
-          id: "resultSet2",
-          required: false,
-          localized: false,
-          validations: [
-            {
-              regexp: {
-                pattern: "\\d+ - \\d+",
-                flags: "",
-              },
-            },
-          ],
-        },
-        {
-          type: "Symbol",
-          name: "Result Set 3",
-          apiName: "resultSet3",
-          id: "resultSet3",
-          required: false,
-          localized: false,
-          validations: [
-            {
-              regexp: {
-                pattern: "\\d+ - \\d+",
-                flags: "",
-              },
-            },
-          ],
-        },
-        {
+          name: "Is Upper Bracket",
           type: "Boolean",
-          name: "Winner",
-          apiName: "winner",
+          required: true,
+          localized: false,
+        },
+        {
+          id: "round",
+          name: "Round",
+          type: "Integer",
+          required: true,
+          localized: false,
+        },
+        {
+          id: "roundMatchIndex",
+          name: "Round Match Index",
+          type: "Integer",
+          required: true,
+          localized: false,
+        },
+        {
+          id: "player1",
+          name: "Player 1",
+          type: "Link",
+          linkType: "Entry",
+          required: false,
+          localized: false,
+          validations: [{ linkContentType: ["player"] }],
+        },
+        {
+          id: "player2",
+          name: "Player 2",
+          type: "Link",
+          linkType: "Entry",
+          required: false,
+          localized: false,
+          validations: [{ linkContentType: ["player"] }],
+        },
+        {
+          id: "resultSet1",
+          name: "Result Set 1",
+          type: "Symbol",
+          required: false,
+          localized: false,
+          validations: [
+            {
+              regexp: {
+                pattern: "\\d+ - \\d+",
+                flags: "",
+              },
+            },
+          ],
+        },
+        {
+          id: "resultSet2",
+          name: "Result Set 2",
+          type: "Symbol",
+          required: false,
+          localized: false,
+          validations: [
+            {
+              regexp: {
+                pattern: "\\d+ - \\d+",
+                flags: "",
+              },
+            },
+          ],
+        },
+        {
+          id: "resultSet3",
+          name: "Result Set 3",
+          type: "Symbol",
+          required: false,
+          localized: false,
+          validations: [
+            {
+              regexp: {
+                pattern: "\\d+ - \\d+",
+                flags: "",
+              },
+            },
+          ],
+        },
+        {
           id: "winner",
+          name: "Winner",
+          type: "Boolean",
           required: false,
           localized: false,
         },
       ],
     }
   );
+  await sdk.cma.contentType.publish(
+    { contentTypeId: "match" },
+    createdContentType
+  );
 };
 
 export const createPlayerContentType = async (sdk: PageAppSDK) => {
-  await sdk.cma.contentType.createWithId(
+  const createdContentType = await sdk.cma.contentType.createWithId(
     { contentTypeId: "player" },
     {
       name: "Player",
       displayField: "name",
       fields: [
         {
-          type: "Symbol",
-          name: "Name",
-          apiName: "name",
           id: "name",
+          name: "Name",
+          type: "Symbol",
           required: true,
           localized: false,
         },
         {
+          id: "profilePicture",
+          name: "Profile Picture",
           type: "Link",
           linkType: "Asset",
-          name: "Profile Picture",
-          apiName: "profilePicture",
-          id: "profilePicture",
           localized: false,
           required: true,
         },
       ],
     }
+  );
+  await sdk.cma.contentType.publish(
+    { contentTypeId: "player" },
+    createdContentType
   );
 };

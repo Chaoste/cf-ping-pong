@@ -30,6 +30,11 @@ const styles = {
 export const TournamentsListPage = () => {
   const navigate = useNavigate();
   const sdk = useSDK<PageAppSDK>();
+  const {
+    data: areContentTypesReady,
+    error,
+    isLoading: isLoadingContentTypesReady,
+  } = useQuery("contentTypesReady", () => checkContentTypesReady(sdk));
   const { data: tournaments, isLoading: isLoadingTournaments } = useQuery(
     "tournaments",
     {
@@ -37,10 +42,9 @@ export const TournamentsListPage = () => {
         sdk.cma.entry.getMany<TournamentEntry["fields"]>({
           query: { content_type: "tournament" },
         }),
+      enabled: Boolean(!isLoadingContentTypesReady && areContentTypesReady),
     }
   );
-  const { data: areContentTypesReady, isLoading: isLoadingContentTypesReady } =
-    useQuery("contentTypesReady", () => checkContentTypesReady(sdk));
 
   const isLoading = isLoadingTournaments || isLoadingContentTypesReady;
 
@@ -48,25 +52,41 @@ export const TournamentsListPage = () => {
     <Stack flexDirection="column" alignItems="flex-start" padding="spacingL">
       <Flex gap="spacingL" alignItems="flex-start">
         <Heading marginBottom="none">Tournaments</Heading>
-        <Button
-          startIcon={<PlusIcon />}
-          onClick={() => navigate("/tournaments/create")}
-          size="small"
-          isDisabled={isLoading || !areContentTypesReady}
-        >
-          Create
-        </Button>
+        {tournaments?.items.length && (
+          <Button
+            startIcon={<PlusIcon />}
+            onClick={() => navigate("/tournaments/create")}
+            size="small"
+            isDisabled={isLoading || !areContentTypesReady}
+          >
+            Create
+          </Button>
+        )}
       </Flex>
-      {isLoading || tournaments === undefined ? (
+      {isLoading ? (
         <Skeleton.Container>
           <Skeleton.BodyText />
         </Skeleton.Container>
-      ) : !areContentTypesReady ? (
+      ) : !areContentTypesReady || error || tournaments === undefined ? (
         <ContentTypesWarning />
+      ) : tournaments.items.length === 0 ? (
+        <>
+          <Text>No tournaments found.</Text>
+          <Button
+            startIcon={<PlusIcon />}
+            onClick={() => navigate("/tournaments/create")}
+            variant="primary"
+            style={{ maxWidth: "none" }}
+            isDisabled={isLoading || !areContentTypesReady}
+          >
+            Create your first tournament
+          </Button>
+        </>
       ) : (
         <>
           {tournaments.items.map((tournament) => (
             <Card
+              key={tournament.sys.id}
               onClick={() => navigate(`/tournaments/${tournament.sys.id}`)}
               className={styles.card}
             >

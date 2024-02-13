@@ -8,7 +8,14 @@ import { QueryClient, QueryClientProvider } from "react-query";
 
 const container = document.getElementById("root")!;
 const root = createRoot(container);
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: 2,
+    },
+  },
+});
 
 if (process.env.NODE_ENV === "development" && window.self === window.top) {
   // You can remove this if block before deploying your app

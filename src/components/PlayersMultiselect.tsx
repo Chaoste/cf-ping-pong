@@ -41,6 +41,7 @@ export const PlayersMultiselect = () => {
       onBlur={onBlur}
       ref={inputRef}
       placeholder="Select players"
+      noMatchesMessage="No players found"
     >
       {players?.items.map((player) => (
         <Multiselect.Option
