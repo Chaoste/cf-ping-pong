@@ -1,6 +1,6 @@
 ## Contentful Ping Pong
 
-TODO:
+### Potential improvements
 
-- upload app
-- Create players from within the app
+- Allow optional second final
+- Render results seperately

@@ -45,30 +45,64 @@ export const TournamentsListPage = () => {
       enabled: Boolean(!isLoadingContentTypesReady && areContentTypesReady),
     }
   );
+  const { data: players, isLoading: isLoadingPlayers } = useQuery("players", {
+    queryFn: () => sdk.cma.entry.getMany({ query: { content_type: "player" } }),
+    enabled: Boolean(!isLoadingContentTypesReady && areContentTypesReady),
+  });
 
-  const isLoading = isLoadingTournaments || isLoadingContentTypesReady;
+  const isLoading =
+    isLoadingTournaments || isLoadingContentTypesReady || isLoadingPlayers;
 
   return (
     <Stack flexDirection="column" alignItems="flex-start" padding="spacingL">
       <Flex gap="spacingL" alignItems="flex-start">
         <Heading marginBottom="none">Tournaments</Heading>
-        {tournaments?.items.length && (
-          <Button
-            startIcon={<PlusIcon />}
-            onClick={() => navigate("/tournaments/create")}
-            size="small"
-            isDisabled={isLoading || !areContentTypesReady}
-          >
-            Create
-          </Button>
+        {!!tournaments?.items.length && (
+          <>
+            <Button
+              startIcon={<PlusIcon />}
+              onClick={() => navigate("/tournaments/create")}
+              size="small"
+              isDisabled={isLoading || !areContentTypesReady}
+            >
+              Create
+            </Button>
+            <Button
+              startIcon={<PlusIcon />}
+              onClick={() => navigate("/players/create")}
+              size="small"
+              isDisabled={isLoading || !areContentTypesReady}
+            >
+              Add players
+            </Button>
+          </>
         )}
       </Flex>
       {isLoading ? (
         <Skeleton.Container>
           <Skeleton.BodyText />
         </Skeleton.Container>
-      ) : !areContentTypesReady || error || tournaments === undefined ? (
+      ) : !areContentTypesReady ||
+        error ||
+        tournaments === undefined ||
+        players === undefined ? (
         <ContentTypesWarning />
+      ) : players.items.length === 0 ? (
+        <>
+          <Text>
+            No players found. You need to create players before you can create
+            your first tournament.
+          </Text>
+          <Button
+            startIcon={<PlusIcon />}
+            onClick={() => navigate("/players/create")}
+            variant="primary"
+            style={{ maxWidth: "none" }}
+            isDisabled={isLoading || !areContentTypesReady}
+          >
+            Add players
+          </Button>
+        </>
       ) : tournaments.items.length === 0 ? (
         <>
           <Text>No tournaments found.</Text>

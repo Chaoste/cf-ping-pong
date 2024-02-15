@@ -6,6 +6,7 @@ import { TournamentsListPage } from "./TournamentsListPage";
 import { CreateTournamentForm } from "./CreateTournamentForm";
 import { TournamentPage } from "./TournamentPage";
 import { SetupContentModel } from "./SetupContentModel";
+import { BulkCreatePlayersForm } from "./BulkCreatePlayersForm";
 
 interface InvocationParams {
   path: string;
@@ -34,6 +35,7 @@ const PageRoutes = () => {
     <Routes>
       <Route path="/" element={<TournamentsListPage />} />
       <Route path="/setupContentModel" element={<SetupContentModel />} />
+      <Route path="/players/create" element={<BulkCreatePlayersForm />} />
       <Route path="/tournaments/create" element={<CreateTournamentForm />} />
       <Route path="/tournaments/:tournamentId" element={<TournamentPage />} />
     </Routes>
