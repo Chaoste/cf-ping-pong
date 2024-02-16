@@ -1,6 +1,6 @@
 ## Contentful Ping Pong
 
-[![Watch the video](./res/cf-ping-pong-screenshot.png)](https://drive.google.com/file/d/1lkMieRWMOfcqj5awKAFLflQsHnoD9FVC/view?usp=sharing)
+https://github.com/Chaoste/cf-ping-pong/assets/9327071/994460ea-a098-4d4f-afbc-55abcdeb9a16
 
 ### Potential improvements
 
