@@ -300,8 +300,6 @@ export const DoubleElimininationTree = ({
         options={
           {
             style: {
-              spaceBetweenColumns: 10,
-              spaceBetweenRows: 10,
               roundHeader: {
                 backgroundColor: WhiteTheme.roundHeader.backgroundColor,
                 fontColor: WhiteTheme.roundHeader.fontColor,
