@@ -10,7 +10,6 @@ import {
   IconButton,
   Notification,
   Skeleton,
-  SkeletonContainer,
   Stack,
   Subheading,
   Textarea,

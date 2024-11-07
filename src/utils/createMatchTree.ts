@@ -51,6 +51,8 @@ export const createMatchTree = (
     }
   }
 
+  debugger;
+
   // Add all remaining lower bracket matches
   round = 1;
   roundMatchIndex = 1;
@@ -62,16 +64,13 @@ export const createMatchTree = (
       isUpperBracket: false,
     });
     roundMatchIndex++;
-    if (round % 2 === 1) {
-      if (roundMatchIndex > Math.pow(2, amountLowerRounds / 2 - round)) {
-        round++;
-        roundMatchIndex = 1;
-      }
-    } else {
-      if (roundMatchIndex > Math.pow(2, amountLowerRounds / 2 - round + 1)) {
-        round++;
-        roundMatchIndex = 1;
-      }
+    const matchesPerRound = Math.pow(
+      2,
+      amountLowerRounds / 2 - Math.ceil(round / 2)
+    );
+    if (roundMatchIndex > matchesPerRound) {
+      round++;
+      roundMatchIndex = 1;
     }
   }
 

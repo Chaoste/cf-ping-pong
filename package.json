@@ -10,6 +10,7 @@
     "@contentful/f36-tokens": "4.0.4",
     "@contentful/react-apps-toolkit": "1.2.16",
     "@g-loot/react-tournament-brackets": "^1.0.31-rc",
+    "@rehooks/component-size": "^1.0.3",
     "contentful-management": "10.46.4",
     "emotion": "10.0.27",
     "react": "18.2.0",

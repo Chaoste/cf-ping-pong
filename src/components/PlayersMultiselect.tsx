@@ -29,10 +29,29 @@ export const PlayersMultiselect = () => {
     }
   };
 
-  const selectedPlayerLabels = selectedPlayerIds.map((id: string) => {
-    const player = players?.items.find((player) => player.sys.id === id);
-    return player?.fields.name["en-US"] || "";
-  });
+  const toggleAll = (event: any) => {
+    const { checked } = event.target;
+    if (checked) {
+      onChange(players?.items.map((player) => player.sys.id) || []);
+    } else {
+      onChange([]);
+    }
+  };
+
+  const areAllSelected = React.useMemo(() => {
+    return players?.items.every((element) =>
+      selectedPlayerIds.includes(element.sys.id)
+    );
+  }, [players?.items, selectedPlayerIds]);
+
+  const selectedPlayerLabels = React.useMemo(
+    () =>
+      selectedPlayerIds.map((id: string) => {
+        const player = players?.items.find((player) => player.sys.id === id);
+        return player?.fields.name["en-US"] || "";
+      }),
+    [players?.items, selectedPlayerIds]
+  );
 
   return (
     <Multiselect
@@ -43,6 +62,10 @@ export const PlayersMultiselect = () => {
       placeholder="Select players"
       noMatchesMessage="No players found"
     >
+      <Multiselect.SelectAll
+        onSelectItem={toggleAll}
+        isChecked={areAllSelected}
+      />
       {players?.items.map((player) => (
         <Multiselect.Option
           key={player.sys.id}

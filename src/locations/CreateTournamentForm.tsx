@@ -41,7 +41,7 @@ const CreateTournamentFormContents = () => {
   const { handleSubmit, register } =
     useFormContext<CreateTournamentFormFields>();
   const { isValid } = useFormState();
-  const { mutate } = useMutation({
+  const { mutate, isLoading } = useMutation({
     mutationFn: async (data: CreateTournamentFormFields) => {
       const allMatches = createMatchTree(data.matches);
       const matchEntries = await Promise.all(
@@ -153,7 +153,12 @@ const CreateTournamentFormContents = () => {
           </Box>
         </Flex>
         <Box marginTop="spacing2Xl" marginLeft="spacingXl">
-          <Button isDisabled={!isValid} variant="positive" type="submit">
+          <Button
+            isLoading={isLoading}
+            isDisabled={!isValid || isLoading}
+            variant="positive"
+            type="submit"
+          >
             Create
           </Button>
         </Box>

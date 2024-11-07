@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useRef } from "react";
 import {
   DoubleEliminationBracket,
   Match as MatchComponent,
+  OptionsType,
   SVGViewer,
   createTheme,
 } from "@g-loot/react-tournament-brackets";
@@ -12,6 +13,7 @@ import { PageAppSDK } from "@contentful/app-sdk";
 import { useParams } from "react-router";
 import { useQueryClient } from "react-query";
 import tokens from "@contentful/f36-tokens";
+import useComponentSize from "@rehooks/component-size";
 
 const WhiteTheme = createTheme({
   textColor: { main: "#000000", highlighted: "#07090D", dark: "#3E414D" },
@@ -66,8 +68,7 @@ const toVisualMatch = (
     isUpper || round % 2 === 0
       ? Math.ceil(roundMatchIndex / 2)
       : roundMatchIndex;
-  let nextMatch: MatchEntry | null =
-    bracket[match.fields.round["en-US"] + 1]?.[nextRoundMatchIndex];
+  let nextMatch: MatchEntry | null = bracket[round + 1]?.[nextRoundMatchIndex];
   if (!isUpper && !nextMatch) {
     const lastRound = Object.keys(matchesMap.upper).length;
     // The last lower bracket match points again to the final in the upper bracket at the end
@@ -267,40 +268,50 @@ export const DoubleElimininationTree = ({
 
   // TODO: Text color player #c0c3c8
 
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const wrapperSize = useComponentSize(wrapperRef);
+
+  // FIXME: Bug in library: https://github.com/g-loot/react-tournament-brackets/issues/77
   return (
-    <DoubleEliminationBracket
-      matches={bracketMatches}
-      matchComponent={MatchComponent}
-      onMatchClick={openMatch}
-      onPartyClick={openParty}
-      svgWrapper={({ children, ...props }: any) => {
-        if (tournament.fields.players["en-US"].length <= 4) {
-          return <>{children}</>;
-        } else {
-          return (
-            <SVGViewer
-              background={WhiteTheme.svgBackground}
-              SVGBackground={WhiteTheme.svgBackground}
-              width={1000}
-              height={1000}
-              {...props}
-            >
-              {children}
-            </SVGViewer>
-          );
+    <div ref={wrapperRef} style={{ width: "100%", minHeight: "600px" }}>
+      <DoubleEliminationBracket
+        matches={bracketMatches}
+        matchComponent={MatchComponent}
+        onMatchClick={openMatch}
+        onPartyClick={openParty}
+        svgWrapper={({ children, ...props }: any) => {
+          if (tournament.fields.players["en-US"].length <= 4) {
+            return <>{children}</>;
+          } else {
+            return (
+              <SVGViewer
+                background={WhiteTheme.svgBackground}
+                SVGBackground={WhiteTheme.svgBackground}
+                width={wrapperSize.width}
+                height={wrapperSize.height}
+                {...props}
+              >
+                {children}
+              </SVGViewer>
+            );
+          }
+        }}
+        theme={WhiteTheme}
+        options={
+          {
+            style: {
+              spaceBetweenColumns: 10,
+              spaceBetweenRows: 10,
+              roundHeader: {
+                backgroundColor: WhiteTheme.roundHeader.backgroundColor,
+                fontColor: WhiteTheme.roundHeader.fontColor,
+              },
+              connectorColor: WhiteTheme.connectorColor,
+              connectorColorHighlight: WhiteTheme.connectorColorHighlight,
+            },
+          } as typeof OptionsType
         }
-      }}
-      theme={WhiteTheme}
-      options={{
-        style: {
-          roundHeader: {
-            backgroundColor: WhiteTheme.roundHeader.backgroundColor,
-            fontColor: WhiteTheme.roundHeader.fontColor,
-          },
-          connectorColor: WhiteTheme.connectorColor,
-          connectorColorHighlight: WhiteTheme.connectorColorHighlight,
-        },
-      }}
-    />
+      />
+    </div>
   );
 };
