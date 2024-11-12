@@ -273,7 +273,14 @@ export const DoubleElimininationTree = ({
 
   // FIXME: Bug in library: https://github.com/g-loot/react-tournament-brackets/issues/77
   return (
-    <div ref={wrapperRef} style={{ width: "100%", minHeight: "600px" }}>
+    <div
+      ref={wrapperRef}
+      style={{
+        width: "100%",
+        minHeight: "600px",
+        height: "calc(100vh - 120px)",
+      }}
+    >
       <DoubleEliminationBracket
         matches={bracketMatches}
         matchComponent={MatchComponent}
