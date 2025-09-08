@@ -4,5 +4,6 @@ https://github.com/Chaoste/cf-ping-pong/assets/9327071/994460ea-a098-4d4f-afbc-5
 
 ### Potential improvements
 
+- Better way to insert results
 - Allow optional second final
 - Render results seperately

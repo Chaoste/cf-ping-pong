@@ -101,7 +101,7 @@ const toVisualMatch = (
   sets.forEach((set) => {
     if (set) {
       const [score1, score2] = set.split("-").map(Number);
-      if (!score1 || !score2) return;
+      if (!score1 && !score2) return;
       if (score1 > score2) {
         setsWonByPlayer1++;
       } else {
@@ -136,14 +136,16 @@ const toVisualMatch = (
         const player = players.find(
           (player) => player.sys.id === playerLink!.sys.id
         );
+
         return {
           id: player!.sys.id,
           name: player!.fields.name["en-US"],
           status: null,
           // true: player 1 won, false: player 2 won, undefined: not played yet
-          isWinner: match.fields.winner?.["en-US"]
-            ? match.fields.winner["en-US"] === !Boolean(index)
-            : undefined,
+          isWinner:
+            match.fields.winner?.["en-US"] !== undefined
+              ? match.fields.winner["en-US"] === !Boolean(index)
+              : undefined,
           resultText:
             match.fields.winner?.["en-US"] !== undefined
               ? index === 0
@@ -203,16 +205,38 @@ export const DoubleElimininationTree = ({
   };
 
   const openMatch = async ({ match }: { match: MatchType }) => {
+    let shouldInvalidateMatchQuery = false;
     if (!match.id) return;
     const matchVersion = matches.find((m) => m.sys.id === match.id)?.sys
       .version;
-    const { entity: updatedMatch } = await sdk.navigator.openEntry<
+    let { entity: updatedMatch } = await sdk.navigator.openEntry<
       MatchEntry["fields"]
     >(match.id, {
       slideIn: {
         waitForClose: true,
       },
     });
+    if (!updatedMatch || updatedMatch?.sys.version === matchVersion) {
+      console.debug(
+        "[cf-ping-pong] No changes detected for the opened match. Rechecking after 2 seconds"
+      );
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      const refetchedMatch = await sdk.cma.entry.get<MatchEntry["fields"]>({
+        entryId: match.id,
+      });
+      if (!refetchedMatch || refetchedMatch?.sys.version === matchVersion) {
+        console.debug(
+          "[cf-ping-pong] No changes detected on the second check",
+          {
+            refetchedMatch,
+          }
+        );
+        return;
+      }
+      updatedMatch = refetchedMatch;
+      shouldInvalidateMatchQuery = true;
+    }
+
     if (updatedMatch && updatedMatch?.sys.version !== matchVersion) {
       const nextMatch = matches.find((m) => m.sys.id === match.nextMatchId);
       const nextLooserMatch = matches.find(
@@ -227,26 +251,61 @@ export const DoubleElimininationTree = ({
           ? updatedMatch.fields.player2?.["en-US"]
           : updatedMatch.fields.player1?.["en-US"];
         if (nextMatch) {
-          if (!nextMatch.fields.player1?.["en-US"]) {
+          let hasChanged = false;
+          if (
+            !nextMatch.fields.player1?.["en-US"] &&
+            nextMatch.fields.player2?.["en-US"] !== winnerPlayerId
+          ) {
             nextMatch.fields.player1 = { "en-US": winnerPlayerId };
-          } else if (!nextMatch.fields.player2?.["en-US"]) {
+            hasChanged = true;
+          } else if (
+            !nextMatch.fields.player2?.["en-US"] &&
+            nextMatch.fields.player1?.["en-US"] !== winnerPlayerId
+          ) {
             nextMatch.fields.player2 = { "en-US": winnerPlayerId };
+            hasChanged = true;
           }
-          await sdk.cma.entry.update({ entryId: nextMatch.sys.id }, nextMatch);
+          if (hasChanged) {
+            await sdk.cma.entry.update(
+              { entryId: nextMatch.sys.id },
+              nextMatch
+            );
+            shouldInvalidateMatchQuery = true;
+            console.debug("[cf-ping-pong] Updated next UB match:", {
+              match: nextMatch,
+            });
+          }
         }
         if (nextLooserMatch) {
-          if (!nextLooserMatch.fields.player1?.["en-US"]) {
+          let hasChanged = false;
+          if (
+            !nextLooserMatch.fields.player1?.["en-US"] &&
+            nextLooserMatch.fields.player2?.["en-US"] !== looserPlayerId
+          ) {
             nextLooserMatch.fields.player1 = { "en-US": looserPlayerId };
-          } else if (!nextLooserMatch.fields.player2?.["en-US"]) {
+            hasChanged = true;
+          } else if (
+            !nextLooserMatch.fields.player2?.["en-US"] &&
+            nextLooserMatch.fields.player1?.["en-US"] !== looserPlayerId
+          ) {
             nextLooserMatch.fields.player2 = { "en-US": looserPlayerId };
+            hasChanged = true;
           }
-          await sdk.cma.entry.update(
-            { entryId: nextLooserMatch.sys.id },
-            nextLooserMatch
-          );
+          if (hasChanged) {
+            await sdk.cma.entry.update(
+              { entryId: nextLooserMatch.sys.id },
+              nextLooserMatch
+            );
+            shouldInvalidateMatchQuery = true;
+            console.debug("[cf-ping-pong] Updated next LB match:", {
+              match: nextLooserMatch,
+            });
+          }
         }
       }
-      queryClient.invalidateQueries(["tournaments", tournamentId, "matches"]);
+      if (shouldInvalidateMatchQuery) {
+        queryClient.invalidateQueries(["tournaments", tournamentId, "matches"]);
+      }
     }
   };
 
