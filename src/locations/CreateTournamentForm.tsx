@@ -68,6 +68,9 @@ const CreateTournamentFormContents = () => {
                 player2: {
                   "en-US": match.player2,
                 },
+                winner: {
+                  "en-US": match.winner,
+                },
               },
             }
           )

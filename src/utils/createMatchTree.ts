@@ -1,3 +1,4 @@
+import { Link } from "contentful-management";
 import { Match } from "../types";
 
 export const createMatchTree = (
@@ -32,17 +33,34 @@ export const createMatchTree = (
           },
         }
       : undefined,
+    winner: !match[1] ? true : undefined,
   }));
 
   // Add all remaining upper bracket matches
   let round = 2;
   let roundMatchIndex = 1;
   for (let i = firstMatches.length; i < amountAllUpperMatches; i++) {
+    let player1: Link<"Entry"> | undefined = undefined;
+    let player2: Link<"Entry"> | undefined = undefined;
+    const previousMatches = matches.filter(
+      // eslint-disable-next-line no-loop-func
+      (m) => m.isUpperBracket && m.round === round - 1
+    );
+    const previousMatch1 = previousMatches[(roundMatchIndex - 1) * 2];
+    const previousMatch2 = previousMatches[(roundMatchIndex - 1) * 2 + 1];
+    if (previousMatch1?.winner !== undefined) {
+      player1 = previousMatch1.player1;
+    }
+    if (previousMatch2?.winner !== undefined) {
+      player2 = previousMatch2.player1;
+    }
     matches.push({
       matchNumber: `UB ${round}.${roundMatchIndex}`,
       round,
       roundMatchIndex,
       isUpperBracket: true,
+      player1,
+      player2,
     });
     roundMatchIndex++;
     if (roundMatchIndex > Math.pow(2, amountUpperRounds - round)) {
@@ -50,8 +68,6 @@ export const createMatchTree = (
       roundMatchIndex = 1;
     }
   }
-
-  debugger;
 
   // Add all remaining lower bracket matches
   round = 1;
