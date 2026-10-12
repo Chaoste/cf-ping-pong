@@ -5,9 +5,8 @@ https://github.com/Chaoste/cf-ping-pong/assets/9327071/994460ea-a098-4d4f-afbc-5
 ## Experience Orchestration preview
 
 The local dashboard is a native Experience Orchestration composition: four custom
-components are bound to the existing `Tournament`, `Match`, and `Player` content
-through one Data Assembly; reusable Experience Fragments compose them into the
-`ping-pong-dashboard` Experience.
+components are each bound to a UI-authored, component-specific Match Data Assembly.
+Reusable Experience Fragments compose them into the `ping-pong-dashboard` Experience.
 
 Copy `.env.example` to the ignored `.env.local`, add credentials, then provision
 the XO entities and start the local preview:

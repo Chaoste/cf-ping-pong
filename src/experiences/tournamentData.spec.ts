@@ -1,6 +1,7 @@
 import {
   getCurrentResults,
   getNextMatch,
+  getRegisteredPlayerCount,
   getReadyMatches,
   isPlayedMatch,
   isReadyMatch,
@@ -53,6 +54,19 @@ describe("tournament status helpers", () => {
     expect(isReadyMatch(ready)).toBe(true);
   });
 
+  it("counts each participant once from the bracket", () => {
+    expect(
+      getRegisteredPlayerCount([
+        createMatch(),
+        createMatch({
+          player1: { name: "Player 2" },
+          player2: { name: "Player 3" },
+        }),
+        createMatch({ player1: null, player2: null }),
+      ]),
+    ).toBe(3);
+  });
+
   it("lists the most recently completed matches first", () => {
     const results = getCurrentResults([
       createMatch({
@@ -75,8 +89,6 @@ describe("tournament status helpers", () => {
 
   it("reconstructs tournament data from top-level assembly properties", () => {
     const data = toTournamentData({
-      tournamentName: "Office Open",
-      players: [{ name: "Player 1" }],
       matches: [
         {
           matchNumber: "UB 1.1",
@@ -90,8 +102,6 @@ describe("tournament status helpers", () => {
     });
 
     expect(data).toMatchObject({
-      name: "Office Open",
-      players: [{ name: "Player 1" }],
       matches: [expect.objectContaining({ matchNumber: "UB 1.1" })],
     });
   });

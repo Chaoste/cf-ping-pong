@@ -23,7 +23,7 @@ export const TournamentBracket = (props: ExperienceComponentProps) => {
     <section style={sectionStyle}>
       <p style={eyebrowStyle}>BRACKET</p>
       <h2 style={{ fontSize: "28px", margin: "0 0 20px" }}>
-        {data.name ?? "Tournament"}
+        Tournament
       </h2>
       <BracketLane heading="Upper bracket" matches={upper} />
       <BracketLane heading="Lower bracket" matches={lower} />

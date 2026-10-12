@@ -12,71 +12,52 @@ if (missingEnvironment.length > 0) {
 const spaceId = process.env.CONTENTFUL_SPACE_ID;
 const environmentId = process.env.CONTENTFUL_ENVIRONMENT_ID;
 const accessToken = process.env.CONTENTFUL_CMA_TOKEN;
-const tournamentEntryId = process.env.CONTENTFUL_TOURNAMENT_ID ?? "3OWG1Azlu0l7DRvWSsQOxG";
 const baseUrl = `https://api.contentful.com/spaces/${spaceId}/environments/${environmentId}`;
 
 const componentUrn = (id) =>
   `crn:contentful:::experience:spaces/$self/environments/$self/components/${id}`;
 const templateUrn = (id) =>
   `crn:contentful:::experience:spaces/$self/environments/$self/experienceTemplates/${id}`;
-const assemblyUrn = (id) =>
-  `crn:contentful:::experience:spaces/$self/environments/$self/dataAssemblies/${id}`;
 const fragmentUrn = (id) =>
   `crn:contentful:::experience:spaces/$self/environments/$self/experienceFragments/${id}`;
-const entryUrn = (id) =>
-  `crn:contentful:::content:spaces/$self/environments/$self/entries/${id}`;
 
 const resourceLink = (linkType, urn) => ({
   sys: { type: "ResourceLink", linkType, urn },
 });
 
-const contentSource = "crn:contentful:::content:spaces/$self/environments/$self";
-const tournamentDataProperties = [
-  {
-    id: "tournamentName",
-    name: "Tournament name",
-    required: true,
-    type: "String",
+const matchFields = {
+  completedAt: { id: "completedAt", name: "Completed at", type: "String" },
+  isUpperBracket: {
+    id: "isUpperBracket",
+    name: "Upper bracket",
+    type: "Boolean",
   },
-  {
-    id: "players",
-    name: "Players",
-    required: true,
-    type: "Array",
-    items: {
-      name: "Player",
-      type: "Record",
-      fields: [{ id: "name", name: "Name", type: "String" }],
-    },
+  matchNumber: { id: "matchNumber", name: "Match number", type: "String" },
+  player1Name: { id: "player1Name", name: "Player 1 name", type: "String" },
+  player2Name: { id: "player2Name", name: "Player 2 name", type: "String" },
+  resultSet1: { id: "resultSet1", name: "Result set 1", type: "String" },
+  resultSet2: { id: "resultSet2", name: "Result set 2", type: "String" },
+  resultSet3: { id: "resultSet3", name: "Result set 3", type: "String" },
+  round: { id: "round", name: "Round", type: "Integer" },
+  roundMatchIndex: {
+    id: "roundMatchIndex",
+    name: "Round match index",
+    type: "Integer",
   },
-  {
-    id: "matches",
-    name: "Matches",
-    required: true,
-    type: "Array",
-    items: {
-      name: "Match",
-      type: "Record",
-      fields: [
-        { id: "matchNumber", name: "Match number", type: "String" },
-        { id: "isUpperBracket", name: "Upper bracket", type: "Boolean" },
-        { id: "round", name: "Round", type: "Integer" },
-        { id: "roundMatchIndex", name: "Round match index", type: "Integer" },
-        { id: "resultSet1", name: "Result set 1", type: "String" },
-        { id: "resultSet2", name: "Result set 2", type: "String" },
-        { id: "resultSet3", name: "Result set 3", type: "String" },
-        { id: "completedAt", name: "Completed at", type: "String" },
-        { id: "winner", name: "Winner", type: "Boolean" },
-        { id: "player1Name", name: "Player 1 name", type: "String" },
-        { id: "player2Name", name: "Player 2 name", type: "String" },
-      ],
-    },
-  },
-];
+  winner: { id: "winner", name: "Winner", type: "Boolean" },
+};
 
-const tournamentDataAssemblyType = tournamentDataProperties.map(
-  ({ required: _required, ...property }) => property,
-);
+const matchesProperty = (fieldIds) => ({
+  id: "matches",
+  name: "Matches",
+  required: false,
+  type: "Array",
+  items: {
+    name: "Match",
+    type: "Record",
+    fields: fieldIds.map((fieldId) => matchFields[fieldId]),
+  },
+});
 
 const dashboardComponents = [
   {
@@ -90,28 +71,62 @@ const dashboardComponents = [
     id: "tournament-status",
     name: "Tournament status",
     description: "Shows participation and live tournament progress.",
-    contentProperties: tournamentDataProperties,
+    contentProperties: [matchesProperty(["winner", "player1Name", "player2Name"])],
     slots: [],
   },
   {
     id: "next-match",
     name: "Next match",
     description: "Shows the first playable match in tournament bracket order.",
-    contentProperties: tournamentDataProperties,
+    contentProperties: [
+      matchesProperty([
+        "matchNumber",
+        "isUpperBracket",
+        "round",
+        "roundMatchIndex",
+        "winner",
+        "player1Name",
+        "player2Name",
+      ]),
+    ],
     slots: [],
   },
   {
     id: "current-results",
     name: "Current results",
     description: "Shows played matches and automatic advances.",
-    contentProperties: tournamentDataProperties,
+    contentProperties: [
+      matchesProperty([
+        "matchNumber",
+        "resultSet1",
+        "resultSet2",
+        "resultSet3",
+        "completedAt",
+        "winner",
+        "player1Name",
+        "player2Name",
+      ]),
+    ],
     slots: [],
   },
   {
     id: "tournament-bracket",
     name: "Tournament bracket",
     description: "Shows the full upper and lower tournament brackets.",
-    contentProperties: tournamentDataProperties,
+    contentProperties: [
+      matchesProperty([
+        "matchNumber",
+        "isUpperBracket",
+        "round",
+        "roundMatchIndex",
+        "resultSet1",
+        "resultSet2",
+        "resultSet3",
+        "winner",
+        "player1Name",
+        "player2Name",
+      ]),
+    ],
     slots: [],
   },
 ];
@@ -206,31 +221,23 @@ const upsert = async (collection, id, body, publishEntity = true) => {
   return publishEntity ? publish(collection, id, entity) : entity;
 };
 
-const componentBody = (component, dataAssemblyId) => ({
+const componentBody = (component, dataAssemblies) => ({
   name: component.name,
   description: component.description,
   contentProperties: component.contentProperties,
   designProperties: [],
   slots: component.slots,
   metadata: { tags: [] },
-  ...(dataAssemblyId
-    ? {
-        dataAssemblies: [
-          resourceLink("Contentful:DataAssembly", assemblyUrn(dataAssemblyId)),
-        ],
-      }
-    : {}),
+  ...(dataAssemblies === undefined ? {} : { dataAssemblies }),
 });
 
-const upsertComponents = async (dataAssemblyId) => {
+const upsertComponents = async () => {
   for (const component of dashboardComponents) {
+    const current = await getOrUndefined(`/components/${component.id}`);
     await upsert(
       "components",
       component.id,
-      componentBody(
-        component,
-        component.contentProperties.length > 0 ? dataAssemblyId : undefined
-      )
+      componentBody(component, current?.dataAssemblies ?? [])
     );
     console.log(`Ensured component: ${component.id}`);
   }
@@ -274,139 +281,6 @@ const upsertTemplate = () =>
     },
   });
 
-const findOrCreateDataAssembly = async () => {
-  const collection = await request("/data_assemblies?limit=100");
-  const matches = collection.items.filter(
-    (assembly) => assembly.name === "Tournament dashboard data"
-  );
-  if (matches.length > 1) {
-    throw new Error("More than one Data Assembly is named \"Tournament dashboard data\".");
-  }
-
-  const body = {
-    name: "Tournament dashboard data",
-    description: "Maps a Tournament entry to the tournament dashboard components.",
-    metadata: { tags: [] },
-    parameters: {
-      tournament: {
-        name: "Tournament",
-        type: "ResourceLink",
-        allowedResources: [
-          {
-            type: "Contentful:Entry",
-            source: contentSource,
-            allowedTypes: ["tournament"],
-          },
-        ],
-      },
-    },
-    resolvers: {
-      tournament: {
-        source: "Contentful:GraphQL",
-        query: `query ($id: ID!) {
-  _node(id: $id) {
-    ... on Tournament {
-      name
-      playersCursorCollection(limit: 100) {
-        items { name }
-      }
-      matchesCursorCollection(limit: 100) {
-        items {
-          matchNumber
-          isUpperBracket
-          round
-          roundMatchIndex
-          resultSet1
-          resultSet2
-          resultSet3
-          completedAt
-          winner
-          player1 { name }
-          player2 { name }
-        }
-      }
-    }
-  }
-}`,
-        parameters: { id: "$parameters/tournament" },
-      },
-    },
-    return: {
-      tournamentName: { $from: "$resolvers/tournament/_node/name" },
-      players: {
-        $from: {
-          source: "$resolvers/tournament/_node/playersCursorCollection/items",
-          select: { name: "name" },
-        },
-      },
-      matches: {
-        $from: {
-          source: "$resolvers/tournament/_node/matchesCursorCollection/items",
-          select: {
-            matchNumber: "matchNumber",
-            isUpperBracket: "isUpperBracket",
-            round: "round",
-            roundMatchIndex: "roundMatchIndex",
-            resultSet1: "resultSet1",
-            resultSet2: "resultSet2",
-            resultSet3: "resultSet3",
-            completedAt: "completedAt",
-            winner: "winner",
-            player1Name: "player1/name",
-            player2Name: "player2/name",
-          },
-        },
-      },
-    },
-  };
-
-  if (matches.length === 0) {
-    const created = await request("/data_assemblies", {
-      method: "POST",
-      body: JSON.stringify({
-        ...body,
-        sys: { type: "DataAssembly", dataType: tournamentDataAssemblyType },
-      }),
-    });
-    await publish("data_assemblies", created.sys.id, created);
-    console.log(`Ensured data assembly: ${created.sys.id}`);
-    return created.sys.id;
-  }
-
-  const current = await getOrUndefined(`/data_assemblies/${matches[0].sys.id}`);
-  const updateBody = {
-    ...body,
-    sys: {
-      id: current.sys.id,
-      type: "DataAssembly",
-      version: current.sys.version,
-      dataType: tournamentDataAssemblyType,
-    },
-  };
-  if (isSubset(updateBody, current)) {
-    await publish("data_assemblies", current.sys.id, current);
-    console.log(`Ensured data assembly: ${current.sys.id}`);
-    return current.sys.id;
-  }
-  const updated = await request(`/data_assemblies/${current.sys.id}`, {
-    method: "PUT",
-    headers: { "X-Contentful-Version": String(current.sys.version) },
-    body: JSON.stringify(updateBody),
-  });
-  await publish("data_assemblies", updated.sys.id, updated);
-  console.log(`Ensured data assembly: ${updated.sys.id}`);
-  return updated.sys.id;
-};
-
-const binding = (dataAssemblyId) => ({
-  sys: resourceLink("Contentful:DataAssembly", assemblyUrn(dataAssemblyId)).sys,
-  parameters: {
-    tournament: {
-      $literal: resourceLink("Contentful:Entry", entryUrn(tournamentEntryId)),
-    },
-  },
-});
-
 const fragmentDefinitions = [
   ["tournament-status-fragment", "Tournament status", "tournament-status"],
   ["next-match-fragment", "Next match", "next-match"],
@@ -414,16 +288,17 @@ const fragmentDefinitions = [
   ["tournament-bracket-fragment", "Tournament bracket", "tournament-bracket"],
 ];
 
-const upsertFragments = async (dataAssemblyId, publishEntity) => {
+const upsertFragments = async (publishEntity) => {
   for (const [id, name, componentId] of fragmentDefinitions) {
     const existing = await getOrUndefined(`/experience_fragments/${id}`);
+    if (existing) {
+      console.log(`Preserved fragment: ${id}`);
+      continue;
+    }
     await upsert("experience_fragments", id, {
       name,
       description: `${name} for a tournament dashboard Experience.`,
-      ...(existing
-        ? {}
-        : { component: resourceLink("Contentful:Component", componentUrn(componentId)) }),
-      contentBindings: binding(dataAssemblyId),
+      component: resourceLink("Contentful:Component", componentUrn(componentId)),
       designProperties: {},
       metadata: { tags: [], concepts: [] },
       slots: {},
@@ -462,15 +337,9 @@ const upsertExperience = async (publishEntity) => {
 
 await upsertComponents();
 await upsertTemplate();
-const dataAssemblyId = await findOrCreateDataAssembly();
-await upsertComponents(dataAssemblyId);
-const tournament = await getOrUndefined(`/entries/${tournamentEntryId}`);
-const publishBoundEntities = isCurrentVersionPublished(tournament);
-await upsertFragments(dataAssemblyId, publishBoundEntities);
-await upsertExperience(publishBoundEntities);
+await upsertFragments(false);
+await upsertExperience(false);
 
 console.log(
-  publishBoundEntities
-    ? "Experience Orchestration setup complete."
-    : "Experience Orchestration preview setup complete. Publish the Tournament, then rerun this script to publish the bound XO resources."
+  "Experience Orchestration structure is ready. Author each component's match query and field mappings in the Contentful UI before publishing the fragments and Experience.",
 );

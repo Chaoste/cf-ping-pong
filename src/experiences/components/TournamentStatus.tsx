@@ -1,5 +1,6 @@
 import type { ExperienceComponentProps } from "../componentTypes";
 import {
+  getRegisteredPlayerCount,
   isPlayedMatch,
   isReadyMatch,
   isWalkover,
@@ -40,10 +41,13 @@ export const TournamentStatus = (props: ExperienceComponentProps) => {
         LIVE TOURNAMENT STATUS
       </p>
       <h1 style={{ fontSize: "32px", margin: "0 0 20px" }}>
-        {data.name ?? "Tournament"}
+        Tournament
       </h1>
       <div style={{ display: "flex", flexWrap: "wrap", gap: "12px" }}>
-        <Metric label="Registered players" value={data.players?.length ?? 0} />
+        <Metric
+          label="Registered players"
+          value={getRegisteredPlayerCount(matches)}
+        />
         <Metric label="Played matches" value={completed} />
         <Metric label="Ready matches" value={ready} />
         <Metric label="Waiting matches" value={waiting} />

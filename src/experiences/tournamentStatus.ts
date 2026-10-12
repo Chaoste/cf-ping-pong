@@ -1,4 +1,4 @@
-export type TournamentPlayer = {
+export type TournamentParticipant = {
   name?: string | null;
 };
 
@@ -6,8 +6,8 @@ export type TournamentMatch = {
   completedAt?: string | null;
   isUpperBracket?: boolean | null;
   matchNumber?: string | null;
-  player1?: TournamentPlayer | null;
-  player2?: TournamentPlayer | null;
+  player1?: TournamentParticipant | null;
+  player2?: TournamentParticipant | null;
   resultSet1?: string | null;
   resultSet2?: string | null;
   resultSet3?: string | null;
@@ -18,14 +18,10 @@ export type TournamentMatch = {
 
 export type TournamentData = {
   matches?: TournamentMatch[] | null;
-  name?: string | null;
-  players?: TournamentPlayer[] | null;
 };
 
 export type TournamentAssemblyData = {
   matches?: unknown;
-  players?: unknown;
-  tournamentName?: unknown;
 };
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
@@ -39,14 +35,6 @@ const nullableNumber = (value: unknown) =>
 
 const nullableBoolean = (value: unknown) =>
   typeof value === "boolean" ? value : null;
-
-const toPlayer = (value: unknown): TournamentPlayer | undefined => {
-  if (!isRecord(value)) {
-    return undefined;
-  }
-
-  return { name: nullableString(value.name) };
-};
 
 const toMatch = (value: unknown): TournamentMatch | undefined => {
   if (!isRecord(value)) {
@@ -81,17 +69,18 @@ export const toTournamentData = (
           .map(toMatch)
           .filter((match): match is TournamentMatch => match !== undefined)
       : [],
-    name: nullableString(data.tournamentName),
-    players: Array.isArray(data.players)
-      ? data.players
-          .map(toPlayer)
-          .filter((player): player is TournamentPlayer => player !== undefined)
-      : [],
   };
 };
 
-export const playerName = (player: TournamentPlayer | null | undefined) =>
+export const playerName = (player: TournamentParticipant | null | undefined) =>
   player?.name ?? "TBD";
+
+export const getRegisteredPlayerCount = (matches: TournamentMatch[]) =>
+  new Set(
+    matches
+      .flatMap((match) => [match.player1?.name, match.player2?.name])
+      .filter((name): name is string => typeof name === "string"),
+  ).size;
 
 export const isReadyMatch = (match: TournamentMatch) =>
   !!match.player1?.name && !!match.player2?.name && match.winner === null;
