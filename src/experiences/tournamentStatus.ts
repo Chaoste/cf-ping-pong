@@ -22,6 +22,12 @@ export type TournamentData = {
   players?: TournamentPlayer[] | null;
 };
 
+export type TournamentAssemblyData = {
+  matches?: unknown;
+  players?: unknown;
+  tournamentName?: unknown;
+};
+
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null;
 
@@ -51,8 +57,8 @@ const toMatch = (value: unknown): TournamentMatch | undefined => {
     completedAt: nullableString(value.completedAt),
     isUpperBracket: nullableBoolean(value.isUpperBracket),
     matchNumber: nullableString(value.matchNumber),
-    player1: toPlayer(value.player1),
-    player2: toPlayer(value.player2),
+    player1: { name: nullableString(value.player1Name) },
+    player2: { name: nullableString(value.player2Name) },
     resultSet1: nullableString(value.resultSet1),
     resultSet2: nullableString(value.resultSet2),
     resultSet3: nullableString(value.resultSet3),
@@ -63,21 +69,21 @@ const toMatch = (value: unknown): TournamentMatch | undefined => {
 };
 
 export const toTournamentData = (
-  value: unknown,
+  data: TournamentAssemblyData,
 ): TournamentData | undefined => {
-  if (!isRecord(value)) {
+  if (Object.values(data).every((value) => value === undefined)) {
     return undefined;
   }
 
   return {
-    matches: Array.isArray(value.matches)
-      ? value.matches
+    matches: Array.isArray(data.matches)
+      ? data.matches
           .map(toMatch)
           .filter((match): match is TournamentMatch => match !== undefined)
       : [],
-    name: nullableString(value.name),
-    players: Array.isArray(value.players)
-      ? value.players
+    name: nullableString(data.tournamentName),
+    players: Array.isArray(data.players)
+      ? data.players
           .map(toPlayer)
           .filter((player): player is TournamentPlayer => player !== undefined)
       : [],

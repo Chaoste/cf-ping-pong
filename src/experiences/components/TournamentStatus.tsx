@@ -14,8 +14,8 @@ const metricStyle = {
   padding: "16px",
 };
 
-export const TournamentStatus = ({ tournament }: ExperienceComponentProps) => {
-  const data = toTournamentData(tournament);
+export const TournamentStatus = (props: ExperienceComponentProps) => {
+  const data = toTournamentData(props);
 
   if (!data) {
     return <p>The Tournament data assembly has not returned data yet.</p>;

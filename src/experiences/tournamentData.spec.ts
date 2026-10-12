@@ -5,6 +5,7 @@ import {
   isPlayedMatch,
   isReadyMatch,
   isWalkover,
+  toTournamentData,
   TournamentMatch,
 } from "./tournamentStatus";
 
@@ -70,5 +71,28 @@ describe("tournament status helpers", () => {
       "latest",
       "earlier",
     ]);
+  });
+
+  it("reconstructs tournament data from top-level assembly properties", () => {
+    const data = toTournamentData({
+      tournamentName: "Office Open",
+      players: [{ name: "Player 1" }],
+      matches: [
+        {
+          matchNumber: "UB 1.1",
+          player1Name: "Player 1",
+          player2Name: "Player 2",
+          round: 1,
+          roundMatchIndex: 1,
+          isUpperBracket: true,
+        },
+      ],
+    });
+
+    expect(data).toMatchObject({
+      name: "Office Open",
+      players: [{ name: "Player 1" }],
+      matches: [expect.objectContaining({ matchNumber: "UB 1.1" })],
+    });
   });
 });

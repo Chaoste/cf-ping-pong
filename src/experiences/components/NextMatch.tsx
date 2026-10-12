@@ -5,8 +5,8 @@ import {
   toTournamentData,
 } from "../tournamentStatus";
 
-export const NextMatch = ({ tournament }: ExperienceComponentProps) => {
-  const data = toTournamentData(tournament);
+export const NextMatch = (props: ExperienceComponentProps) => {
+  const data = toTournamentData(props);
   const matches = data ? getReadyMatches(data.matches ?? []) : [];
 
   if (!data) {

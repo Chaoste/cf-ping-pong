@@ -31,57 +31,52 @@ const resourceLink = (linkType, urn) => ({
 });
 
 const contentSource = "crn:contentful:::content:spaces/$self/environments/$self";
-const tournamentProperty = {
-  id: "tournament",
-  name: "Tournament",
-  required: true,
-  type: "Record",
-  fields: [
-    { id: "name", name: "Name", type: "String" },
-    {
-      id: "players",
-      name: "Players",
-      type: "Array",
-      items: {
-        name: "Player",
-        type: "Record",
-        fields: [{ id: "name", name: "Name", type: "String" }],
-      },
+const tournamentDataProperties = [
+  {
+    id: "tournamentName",
+    name: "Tournament name",
+    required: true,
+    type: "String",
+  },
+  {
+    id: "players",
+    name: "Players",
+    required: true,
+    type: "Array",
+    items: {
+      name: "Player",
+      type: "Record",
+      fields: [{ id: "name", name: "Name", type: "String" }],
     },
-    {
-      id: "matches",
-      name: "Matches",
-      type: "Array",
-      items: {
-        name: "Match",
-        type: "Record",
-        fields: [
-          { id: "matchNumber", name: "Match number", type: "String" },
-          { id: "isUpperBracket", name: "Upper bracket", type: "Boolean" },
-          { id: "round", name: "Round", type: "Integer" },
-          { id: "roundMatchIndex", name: "Round match index", type: "Integer" },
-          { id: "resultSet1", name: "Result set 1", type: "String" },
-          { id: "resultSet2", name: "Result set 2", type: "String" },
-          { id: "resultSet3", name: "Result set 3", type: "String" },
-          { id: "completedAt", name: "Completed at", type: "String" },
-          { id: "winner", name: "Winner", type: "Boolean" },
-          {
-            id: "player1",
-            name: "Player 1",
-            type: "Record",
-            fields: [{ id: "name", name: "Name", type: "String" }],
-          },
-          {
-            id: "player2",
-            name: "Player 2",
-            type: "Record",
-            fields: [{ id: "name", name: "Name", type: "String" }],
-          },
-        ],
-      },
+  },
+  {
+    id: "matches",
+    name: "Matches",
+    required: true,
+    type: "Array",
+    items: {
+      name: "Match",
+      type: "Record",
+      fields: [
+        { id: "matchNumber", name: "Match number", type: "String" },
+        { id: "isUpperBracket", name: "Upper bracket", type: "Boolean" },
+        { id: "round", name: "Round", type: "Integer" },
+        { id: "roundMatchIndex", name: "Round match index", type: "Integer" },
+        { id: "resultSet1", name: "Result set 1", type: "String" },
+        { id: "resultSet2", name: "Result set 2", type: "String" },
+        { id: "resultSet3", name: "Result set 3", type: "String" },
+        { id: "completedAt", name: "Completed at", type: "String" },
+        { id: "winner", name: "Winner", type: "Boolean" },
+        { id: "player1Name", name: "Player 1 name", type: "String" },
+        { id: "player2Name", name: "Player 2 name", type: "String" },
+      ],
     },
-  ],
-};
+  },
+];
+
+const tournamentDataAssemblyType = tournamentDataProperties.map(
+  ({ required: _required, ...property }) => property,
+);
 
 const dashboardComponents = [
   {
@@ -95,28 +90,28 @@ const dashboardComponents = [
     id: "tournament-status",
     name: "Tournament status",
     description: "Shows participation and live tournament progress.",
-    contentProperties: [tournamentProperty],
+    contentProperties: tournamentDataProperties,
     slots: [],
   },
   {
     id: "next-match",
     name: "Next match",
     description: "Shows the first playable match in tournament bracket order.",
-    contentProperties: [tournamentProperty],
+    contentProperties: tournamentDataProperties,
     slots: [],
   },
   {
     id: "current-results",
     name: "Current results",
     description: "Shows played matches and automatic advances.",
-    contentProperties: [tournamentProperty],
+    contentProperties: tournamentDataProperties,
     slots: [],
   },
   {
     id: "tournament-bracket",
     name: "Tournament bracket",
     description: "Shows the full upper and lower tournament brackets.",
-    contentProperties: [tournamentProperty],
+    contentProperties: tournamentDataProperties,
     slots: [],
   },
 ];
@@ -337,10 +332,30 @@ const findOrCreateDataAssembly = async () => {
       },
     },
     return: {
-      tournament: {
-        name: { $from: "$resolvers/tournament/_node/name" },
-        players: { $from: "$resolvers/tournament/_node/playersCursorCollection/items" },
-        matches: { $from: "$resolvers/tournament/_node/matchesCursorCollection/items" },
+      tournamentName: { $from: "$resolvers/tournament/_node/name" },
+      players: {
+        $from: {
+          source: "$resolvers/tournament/_node/playersCursorCollection/items",
+          select: { name: "name" },
+        },
+      },
+      matches: {
+        $from: {
+          source: "$resolvers/tournament/_node/matchesCursorCollection/items",
+          select: {
+            matchNumber: "matchNumber",
+            isUpperBracket: "isUpperBracket",
+            round: "round",
+            roundMatchIndex: "roundMatchIndex",
+            resultSet1: "resultSet1",
+            resultSet2: "resultSet2",
+            resultSet3: "resultSet3",
+            completedAt: "completedAt",
+            winner: "winner",
+            player1Name: "player1/name",
+            player2Name: "player2/name",
+          },
+        },
       },
     },
   };
@@ -350,7 +365,7 @@ const findOrCreateDataAssembly = async () => {
       method: "POST",
       body: JSON.stringify({
         ...body,
-        sys: { type: "DataAssembly", dataType: [tournamentProperty] },
+        sys: { type: "DataAssembly", dataType: tournamentDataAssemblyType },
       }),
     });
     await publish("data_assemblies", created.sys.id, created);
@@ -365,7 +380,7 @@ const findOrCreateDataAssembly = async () => {
       id: current.sys.id,
       type: "DataAssembly",
       version: current.sys.version,
-      dataType: [tournamentProperty],
+      dataType: tournamentDataAssemblyType,
     },
   };
   if (isSubset(updateBody, current)) {

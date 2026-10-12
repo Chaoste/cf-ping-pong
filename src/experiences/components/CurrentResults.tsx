@@ -8,8 +8,8 @@ import {
   winnerName,
 } from "../tournamentStatus";
 
-export const CurrentResults = ({ tournament }: ExperienceComponentProps) => {
-  const data = toTournamentData(tournament);
+export const CurrentResults = (props: ExperienceComponentProps) => {
+  const data = toTournamentData(props);
 
   if (!data) {
     return <p>The Tournament data assembly has not returned data yet.</p>;
