@@ -338,11 +338,9 @@ const findOrCreateDataAssembly = async () => {
     },
     return: {
       tournament: {
-        $object: {
-          name: { $from: "$resolvers/tournament/_node/name" },
-          players: { $from: "$resolvers/tournament/_node/playersCursorCollection/items" },
-          matches: { $from: "$resolvers/tournament/_node/matchesCursorCollection/items" },
-        },
+        name: { $from: "$resolvers/tournament/_node/name" },
+        players: { $from: "$resolvers/tournament/_node/playersCursorCollection/items" },
+        matches: { $from: "$resolvers/tournament/_node/matchesCursorCollection/items" },
       },
     },
   };
