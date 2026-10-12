@@ -63,6 +63,7 @@ const tournamentProperty = {
           { id: "resultSet1", name: "Result set 1", type: "String" },
           { id: "resultSet2", name: "Result set 2", type: "String" },
           { id: "resultSet3", name: "Result set 3", type: "String" },
+          { id: "completedAt", name: "Completed at", type: "String" },
           { id: "winner", name: "Winner", type: "Boolean" },
           {
             id: "player1",
@@ -323,6 +324,7 @@ const findOrCreateDataAssembly = async () => {
           resultSet1
           resultSet2
           resultSet3
+          completedAt
           winner
           player1 { name }
           player2 { name }

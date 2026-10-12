@@ -3,6 +3,7 @@ export type TournamentPlayer = {
 };
 
 export type TournamentMatch = {
+  completedAt?: string | null;
   isUpperBracket?: boolean | null;
   matchNumber?: string | null;
   player1?: TournamentPlayer | null;
@@ -47,6 +48,7 @@ const toMatch = (value: unknown): TournamentMatch | undefined => {
   }
 
   return {
+    completedAt: nullableString(value.completedAt),
     isUpperBracket: nullableBoolean(value.isUpperBracket),
     matchNumber: nullableString(value.matchNumber),
     player1: toPlayer(value.player1),
@@ -60,7 +62,9 @@ const toMatch = (value: unknown): TournamentMatch | undefined => {
   };
 };
 
-export const toTournamentData = (value: unknown): TournamentData | undefined => {
+export const toTournamentData = (
+  value: unknown,
+): TournamentData | undefined => {
   if (!isRecord(value)) {
     return undefined;
   }
@@ -87,30 +91,48 @@ export const isReadyMatch = (match: TournamentMatch) =>
   !!match.player1?.name && !!match.player2?.name && match.winner === null;
 
 export const isWalkover = (match: TournamentMatch) =>
-  typeof match.winner === "boolean" && (!match.player1?.name || !match.player2?.name);
+  typeof match.winner === "boolean" &&
+  (!match.player1?.name || !match.player2?.name);
 
 export const isPlayedMatch = (match: TournamentMatch) =>
   typeof match.winner === "boolean" && !isWalkover(match);
 
+const matchPriority = (left: TournamentMatch, right: TournamentMatch) => {
+  const leftRound = left.round ?? Number.MAX_SAFE_INTEGER;
+  const rightRound = right.round ?? Number.MAX_SAFE_INTEGER;
+  if (leftRound !== rightRound) {
+    return leftRound - rightRound;
+  }
+  if (left.isUpperBracket !== right.isUpperBracket) {
+    return left.isUpperBracket ? -1 : 1;
+  }
+  return (left.roundMatchIndex ?? 0) - (right.roundMatchIndex ?? 0);
+};
+
+export const getReadyMatches = (matches: TournamentMatch[]) =>
+  matches.filter(isReadyMatch).sort(matchPriority);
+
 export const getNextMatch = (matches: TournamentMatch[]) =>
+  getReadyMatches(matches)[0];
+
+export const getCurrentResults = (matches: TournamentMatch[]) =>
   matches
-    .filter(isReadyMatch)
+    .filter((match) => isPlayedMatch(match) || isWalkover(match))
     .sort((left, right) => {
-      const leftRound = left.round ?? Number.MAX_SAFE_INTEGER;
-      const rightRound = right.round ?? Number.MAX_SAFE_INTEGER;
-      if (leftRound !== rightRound) {
-        return leftRound - rightRound;
-      }
-      if (left.isUpperBracket !== right.isUpperBracket) {
-        return left.isUpperBracket ? -1 : 1;
-      }
-      return (left.roundMatchIndex ?? 0) - (right.roundMatchIndex ?? 0);
-    })[0];
+      const leftCompletedAt =
+        Date.parse(left.completedAt ?? "") || Number.NEGATIVE_INFINITY;
+      const rightCompletedAt =
+        Date.parse(right.completedAt ?? "") || Number.NEGATIVE_INFINITY;
+      return rightCompletedAt - leftCompletedAt;
+    });
 
 export const winnerName = (match: TournamentMatch) =>
   match.winner === true ? playerName(match.player1) : playerName(match.player2);
 
 export const score = (match: TournamentMatch) =>
   [match.resultSet1, match.resultSet2, match.resultSet3]
-    .filter((result): result is string => typeof result === "string" && result.length > 0)
+    .filter(
+      (result): result is string =>
+        typeof result === "string" && result.length > 0,
+    )
     .join(", ");

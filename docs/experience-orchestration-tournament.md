@@ -9,13 +9,13 @@ presentation content types.
 
 The bootstrap script creates or updates these resources in the selected environment:
 
-| XO resource | IDs | Purpose |
-| --- | --- | --- |
-| Components | `tournament-dashboard-shell`, `tournament-status`, `next-match`, `current-results`, `tournament-bracket` | Render dashboard layout and four tournament views. |
-| Data Assembly | `Tournament dashboard data` | Queries one `Tournament` entry and maps it to the components' shared `tournament` Record property. |
-| Experience Fragments | `tournament-status-fragment`, `next-match-fragment`, `current-results-fragment`, `tournament-bracket-fragment` | Reusable component instances, each bound to the selected tournament. |
-| Experience Template | `tournament-dashboard` | Composed layout which places the Experience's `content` slot inside the dashboard shell. |
-| Experience | `ping-pong-dashboard` | Places the four fragments in the template's content slot. |
+| XO resource          | IDs                                                                                                            | Purpose                                                                                            |
+| -------------------- | -------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| Components           | `tournament-dashboard-shell`, `tournament-status`, `next-match`, `current-results`, `tournament-bracket`       | Render dashboard layout and four tournament views.                                                 |
+| Data Assembly        | `Tournament dashboard data`                                                                                    | Queries one `Tournament` entry and maps it to the components' shared `tournament` Record property. |
+| Experience Fragments | `tournament-status-fragment`, `next-match-fragment`, `current-results-fragment`, `tournament-bracket-fragment` | Reusable component instances, each bound to the selected tournament.                               |
+| Experience Template  | `tournament-dashboard`                                                                                         | Composed layout which places the Experience's `content` slot inside the dashboard shell.           |
+| Experience           | `ping-pong-dashboard`                                                                                          | Places the four fragments in the template's content slot.                                          |
 
 The Data Assembly's GraphQL resolver uses Contentful's `_node(id: $id)` pattern. XO
 passes the bound `ResourceLink` as the resolver parameter, then maps the Tournament's
@@ -43,24 +43,56 @@ Experience is published; this is required by XO's data-assembly membership valid
    npm start
    ```
 
-`REACT_APP_EXPERIENCES_PREVIEW=true` selects the standalone Experience renderer rather
-than the Marketplace App UI. The renderer resolves the live Experience plan, dispatches
-the registered XO component IDs to the local React components, and recursively renders
-XO slots. It does not query the Tournament content separately.
+`REACT_APP_EXPERIENCES_PREVIEW=true` is the dashboard feature flag. Set it for the
+preview deployment associated with this Contentful space; when it is `false`, this build
+continues to render the Marketplace App UI. The renderer resolves the live Experience
+plan, dispatches the registered XO component IDs to the local React components, and
+recursively renders XO slots. It does not query the Tournament content separately.
+
+When Contentful opens the renderer with a `preview_session_id`, it uses the Experiences
+SDK's Live Preview client: it fetches the Preview Session snapshot, subscribes to that
+session over WebSocket, and resolves every update into the rendered plan. This is the
+live-preview integration used by the Experience, Component, and Template editors; it is
+not the legacy entry-preview integration. Local and hosted Contentful preview
+environments should point to `/?experience_id=ping-pong-dashboard`.
+
+## Hosted preview
+
+Vercel detects this Create React App project and deploys `npm run build` without an
+additional runtime configuration file. Configure the following Vercel environment
+variables for the dashboard deployment, then redeploy whenever one changes:
+
+```sh
+REACT_APP_EXPERIENCES_PREVIEW=true
+REACT_APP_CONTENTFUL_SPACE_ID=nxkmoddzhouk
+REACT_APP_CONTENTFUL_ENVIRONMENT_ID=cf-tournament-2026-10-15
+REACT_APP_CONTENTFUL_DELIVERY_TOKEN=<delivery token>
+REACT_APP_CONTENTFUL_PREVIEW_TOKEN=<preview token>
+REACT_APP_CONTENTFUL_USE_PREVIEW=true
+REACT_APP_CONTENTFUL_EXPERIENCE_ID=ping-pong-dashboard
+```
+
+Create a Contentful preview environment for the Vercel URL with the `tournament`
+content-type configuration and the URL
+`https://<deployment>/?experience_id=ping-pong-dashboard`. Contentful adds the
+Preview Session parameters when opening Experience, Component, or Template Editor;
+the Live Preview hook consumes those parameters automatically.
 
 ## Current tournament behavior
 
 The configured Tournament entry has 14 players and 30 generated matches. It is still a
-draft, currently with seven playable first-round matches, two automatic advances, and no
-scored matches. Therefore the preview must use the Preview API until the tournament is
-published. XO does not allow a published Fragment to bind to an unpublished entry. The
-bootstrap script detects this and leaves the bound Fragments and Experience as drafts;
-the Preview API can resolve them. Once the Tournament is published, rerun the script to
-publish the bound XO resources too.
+draft, currently with seven playable first-round matches, two skipped matches with an
+automatic advance, and no scored matches. Therefore the preview must use the Preview API
+until the tournament is published. XO does not allow a published Fragment to bind to an
+unpublished entry. The bootstrap script detects this and leaves the bound Fragments and
+Experience as drafts; the Preview API can resolve them. Once the Tournament is published,
+rerun the script to publish the bound XO resources too.
 
-The existing content model has no scheduled-start field. “Next match” means the earliest
-ready match sorted by round, upper bracket before lower bracket, then match index. Add a
-date/time field to `Match` only if the dashboard should represent a real-world schedule.
+The existing content model has no scheduled-start field. The dashboard lists all ready
+matches, ordered by round, upper bracket before lower bracket, then match index. It can
+therefore show an available later-round pairing if an earlier match is waiting for players.
+The `completedAt` field is written when a contested match is marked complete, and results
+are sorted newest first. Automatic advances are labelled as skipped rather than as `TBD`.
 The `rounds` field is presently empty, so the bracket view derives its columns from each
 match's `round` and `roundMatchIndex` values.
 

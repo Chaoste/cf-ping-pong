@@ -43,11 +43,11 @@ export const TournamentStatus = ({ tournament }: ExperienceComponentProps) => {
         {data.name ?? "Tournament"}
       </h1>
       <div style={{ display: "flex", flexWrap: "wrap", gap: "12px" }}>
-        <Metric label="Players" value={data.players?.length ?? 0} />
-        <Metric label="Played" value={completed} />
-        <Metric label="Ready now" value={ready} />
-        <Metric label="Waiting" value={waiting} />
-        <Metric label="Byes" value={walkovers} />
+        <Metric label="Registered players" value={data.players?.length ?? 0} />
+        <Metric label="Played matches" value={completed} />
+        <Metric label="Ready matches" value={ready} />
+        <Metric label="Waiting matches" value={waiting} />
+        <Metric label="Skipped matches" value={walkovers} />
       </div>
     </section>
   );

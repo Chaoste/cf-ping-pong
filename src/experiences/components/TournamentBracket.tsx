@@ -1,6 +1,7 @@
 import type { ExperienceComponentProps } from "../componentTypes";
 import {
   isReadyMatch,
+  isWalkover,
   playerName,
   score,
   toTournamentData,
@@ -21,18 +22,28 @@ export const TournamentBracket = ({ tournament }: ExperienceComponentProps) => {
   return (
     <section style={sectionStyle}>
       <p style={eyebrowStyle}>BRACKET</p>
-      <h2 style={{ fontSize: "28px", margin: "0 0 20px" }}>{data.name ?? "Tournament"}</h2>
+      <h2 style={{ fontSize: "28px", margin: "0 0 20px" }}>
+        {data.name ?? "Tournament"}
+      </h2>
       <BracketLane heading="Upper bracket" matches={upper} />
       <BracketLane heading="Lower bracket" matches={lower} />
     </section>
   );
 };
 
-const BracketLane = ({ heading, matches }: { heading: string; matches: TournamentMatch[] }) => {
+const BracketLane = ({
+  heading,
+  matches,
+}: {
+  heading: string;
+  matches: TournamentMatch[];
+}) => {
   const rounds = Array.from(
     new Set(
-      matches.map((match) => match.round).filter((round): round is number => typeof round === "number")
-    )
+      matches
+        .map((match) => match.round)
+        .filter((round): round is number => typeof round === "number"),
+    ),
   ).sort((left, right) => left - right);
 
   if (rounds.length === 0) {
@@ -42,15 +53,33 @@ const BracketLane = ({ heading, matches }: { heading: string; matches: Tournamen
   return (
     <div style={{ marginTop: "24px" }}>
       <h3 style={{ fontSize: "18px", margin: "0 0 12px" }}>{heading}</h3>
-      <div style={{ display: "flex", gap: "12px", overflowX: "auto", paddingBottom: "8px" }}>
+      <div
+        style={{
+          display: "flex",
+          gap: "12px",
+          overflowX: "auto",
+          paddingBottom: "8px",
+        }}
+      >
         {rounds.map((round) => (
-          <div key={round} style={{ display: "grid", flex: "0 0 200px", gap: "10px" }}>
-            <strong style={{ color: "#53627c", fontSize: "14px" }}>Round {round}</strong>
+          <div
+            key={round}
+            style={{ display: "grid", flex: "0 0 200px", gap: "10px" }}
+          >
+            <strong style={{ color: "#53627c", fontSize: "14px" }}>
+              Round {round}
+            </strong>
             {matches
               .filter((match) => match.round === round)
-              .sort((left, right) => (left.roundMatchIndex ?? 0) - (right.roundMatchIndex ?? 0))
+              .sort(
+                (left, right) =>
+                  (left.roundMatchIndex ?? 0) - (right.roundMatchIndex ?? 0),
+              )
               .map((match, index) => (
-                <MatchCard key={`${match.matchNumber ?? "match"}-${index}`} match={match} />
+                <MatchCard
+                  key={`${match.matchNumber ?? "match"}-${index}`}
+                  match={match}
+                />
               ))}
           </div>
         ))}
@@ -61,6 +90,7 @@ const BracketLane = ({ heading, matches }: { heading: string; matches: Tournamen
 
 const MatchCard = ({ match }: { match: TournamentMatch }) => {
   const resultScore = score(match);
+  const isSkipped = isWalkover(match);
 
   return (
     <article
@@ -71,11 +101,29 @@ const MatchCard = ({ match }: { match: TournamentMatch }) => {
         padding: "10px",
       }}
     >
-      <strong style={{ display: "block", fontSize: "12px", marginBottom: "8px" }}>
+      <strong
+        style={{ display: "block", fontSize: "12px", marginBottom: "8px" }}
+      >
         {match.matchNumber ?? "Match"}
       </strong>
-      <Player name={playerName(match.player1)} isWinner={match.winner === true} />
-      <Player name={playerName(match.player2)} isWinner={match.winner === false} />
+      <Player
+        name={
+          isSkipped && !match.player1?.name
+            ? "No opponent — match skipped"
+            : playerName(match.player1)
+        }
+        isMissing={isSkipped && !match.player1?.name}
+        isWinner={match.winner === true}
+      />
+      <Player
+        name={
+          isSkipped && !match.player2?.name
+            ? "No opponent — match skipped"
+            : playerName(match.player2)
+        }
+        isMissing={isSkipped && !match.player2?.name}
+        isWinner={match.winner === false}
+      />
       {resultScore && (
         <small style={{ color: "#53627c", display: "block", marginTop: "6px" }}>
           {resultScore}
@@ -85,10 +133,19 @@ const MatchCard = ({ match }: { match: TournamentMatch }) => {
   );
 };
 
-const Player = ({ name, isWinner }: { name: string; isWinner: boolean }) => (
+const Player = ({
+  name,
+  isMissing,
+  isWinner,
+}: {
+  name: string;
+  isMissing: boolean;
+  isWinner: boolean;
+}) => (
   <div
     style={{
-      color: isWinner ? "#164c2e" : "#1f2a44",
+      color: isMissing ? "#6d7587" : isWinner ? "#164c2e" : "#1f2a44",
+      fontStyle: isMissing ? "italic" : "normal",
       fontWeight: isWinner ? 700 : 400,
       lineHeight: 1.5,
     }}

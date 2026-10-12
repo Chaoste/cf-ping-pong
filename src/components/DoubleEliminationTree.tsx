@@ -243,6 +243,22 @@ export const DoubleElimininationTree = ({
         (m) => m.sys.id === match.nextLooserMatchId
       );
       const winner = updatedMatch.fields.winner?.["en-US"];
+      const wasUnfinished =
+        matches.find((candidate) => candidate.sys.id === match.id)?.fields
+          .winner?.["en-US"] === undefined;
+      const hasTwoPlayers =
+        updatedMatch.fields.player1?.["en-US"] !== undefined &&
+        updatedMatch.fields.player2?.["en-US"] !== undefined;
+
+      if (winner !== undefined && wasUnfinished && hasTwoPlayers) {
+        updatedMatch.fields.completedAt = { "en-US": new Date().toISOString() };
+        updatedMatch = await sdk.cma.entry.update(
+          { entryId: updatedMatch.sys.id },
+          updatedMatch
+        );
+        shouldInvalidateMatchQuery = true;
+      }
+
       if (winner !== undefined) {
         const winnerPlayerId = winner
           ? updatedMatch.fields.player1?.["en-US"]

@@ -1,6 +1,6 @@
 import type { ExperienceComponentProps } from "../componentTypes";
 import {
-  isPlayedMatch,
+  getCurrentResults,
   isWalkover,
   playerName,
   score,
@@ -15,16 +15,16 @@ export const CurrentResults = ({ tournament }: ExperienceComponentProps) => {
     return <p>The Tournament data assembly has not returned data yet.</p>;
   }
 
-  const results = (data.matches ?? []).filter(
-    (match) => isPlayedMatch(match) || isWalkover(match)
-  );
+  const results = getCurrentResults(data.matches ?? []);
 
   return (
     <section style={sectionStyle}>
       <p style={eyebrowStyle}>RESULTS</p>
       <h2 style={{ fontSize: "28px", margin: "0 0 16px" }}>Current results</h2>
       {results.length === 0 ? (
-        <p style={{ color: "#53627c", margin: 0 }}>No results have been recorded yet.</p>
+        <p style={{ color: "#53627c", margin: 0 }}>
+          No results have been recorded yet.
+        </p>
       ) : (
         <div style={{ display: "grid", gap: "8px" }}>
           {results.map((match, index) => {
@@ -45,12 +45,19 @@ export const CurrentResults = ({ tournament }: ExperienceComponentProps) => {
               >
                 <strong>{match.matchNumber ?? "Match"}</strong>
                 <span>
-                  {playerName(match.player1)} <span style={{ color: "#53627c" }}>vs</span>{" "}
-                  {playerName(match.player2)}
+                  {playerName(match.player1)}{" "}
+                  <span style={{ color: "#53627c" }}>vs</span>{" "}
+                  {isBye && !match.player2?.name ? (
+                    <span style={skippedOpponentStyle}>
+                      No opponent — match skipped
+                    </span>
+                  ) : (
+                    playerName(match.player2)
+                  )}
                 </span>
                 <span style={{ fontWeight: 700 }}>
                   {isBye
-                    ? `${winnerName(match)} advances by bye`
+                    ? `${winnerName(match)} advances — match skipped`
                     : `${winnerName(match)} won${resultScore ? ` · ${resultScore}` : ""}`}
                 </span>
               </article>
@@ -75,4 +82,9 @@ const eyebrowStyle = {
   fontSize: "14px",
   fontWeight: 700,
   margin: "0 0 4px",
+};
+
+const skippedOpponentStyle = {
+  color: "#6d7587",
+  fontStyle: "italic",
 };

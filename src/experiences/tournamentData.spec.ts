@@ -1,5 +1,7 @@
 import {
+  getCurrentResults,
   getNextMatch,
+  getReadyMatches,
   isPlayedMatch,
   isReadyMatch,
   isWalkover,
@@ -7,7 +9,7 @@ import {
 } from "./tournamentStatus";
 
 const createMatch = (
-  overrides: Partial<TournamentMatch> = {}
+  overrides: Partial<TournamentMatch> = {},
 ): TournamentMatch => ({
   matchNumber: "UB 1.1",
   isUpperBracket: true,
@@ -29,6 +31,14 @@ describe("tournament status helpers", () => {
     ]);
 
     expect(nextMatch?.matchNumber).toBe("first");
+    expect(
+      getReadyMatches([
+        createMatch({ matchNumber: "lower", isUpperBracket: false }),
+        createMatch({ matchNumber: "later", round: 2 }),
+        createMatch({ matchNumber: "second", roundMatchIndex: 2 }),
+        nextMatch!,
+      ]).map((match) => match.matchNumber),
+    ).toEqual(["first", "second", "lower", "later"]);
   });
 
   it("keeps played matches, byes, and ready matches distinct", () => {
@@ -40,5 +50,25 @@ describe("tournament status helpers", () => {
     expect(isWalkover(bye)).toBe(true);
     expect(isPlayedMatch(bye)).toBe(false);
     expect(isReadyMatch(ready)).toBe(true);
+  });
+
+  it("lists the most recently completed matches first", () => {
+    const results = getCurrentResults([
+      createMatch({
+        matchNumber: "earlier",
+        winner: true,
+        completedAt: "2026-10-15T10:00:00Z",
+      }),
+      createMatch({
+        matchNumber: "latest",
+        winner: false,
+        completedAt: "2026-10-15T11:00:00Z",
+      }),
+    ]);
+
+    expect(results.map((match) => match.matchNumber)).toEqual([
+      "latest",
+      "earlier",
+    ]);
   });
 });
