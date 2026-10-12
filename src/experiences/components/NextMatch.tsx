@@ -28,12 +28,8 @@ export const NextMatch = ({ tournament }: ExperienceComponentProps) => {
   return (
     <section style={cardStyle}>
       <p style={eyebrowStyle}>READY TO PLAY</p>
-      <h2 style={headingStyle}>Matches ready to play</h2>
-      <p style={{ color: "#b7c6ff", margin: "0 0 16px" }}>
-        Start any pairing whose players are available. Earlier rounds are listed
-        first.
-      </p>
-      <div style={{ display: "grid", gap: "10px" }}>
+      <h2 style={headingStyle}>Play these matches next</h2>
+      <div style={{ display: "grid", gap: "10px", marginTop: "16px" }}>
         {matches.map((match, index) => (
           <article
             key={`${match.matchNumber ?? "match"}-${index}`}

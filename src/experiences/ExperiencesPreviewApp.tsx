@@ -1,15 +1,16 @@
-import { fetchExperience } from "@contentful/experiences-client";
 import {
+  createLivePreviewClient,
   fetchPreviewSession,
+  sendPreviewStatus,
   type PreviewSessionOptions,
 } from "@contentful/experiences-live-preview";
+import { fetchExperience } from "@contentful/experiences-client";
 import {
   resolveExperience,
   type PortableRenderPlan,
 } from "@contentful/experiences-sdk-core";
 import { useEffect, useMemo, useState } from "react";
 import { ExperiencePlanRenderer } from "./ExperiencePlanRenderer";
-import { useExperienceLivePreview } from "./useExperienceLivePreview";
 
 type PreviewConfiguration = {
   deliveryToken: string;
@@ -59,6 +60,7 @@ const errorMessage = (error: unknown) =>
 export const ExperiencesPreviewApp = () => {
   const [plan, setPlan] = useState<PortableRenderPlan>();
   const [error, setError] = useState<string>();
+  const [livePreviewError, setLivePreviewError] = useState<string>();
   const previewSessionOptions = useMemo<
     PreviewSessionOptions | undefined
   >(() => {
@@ -81,8 +83,6 @@ export const ExperiencesPreviewApp = () => {
       spaceId: configuration.spaceId,
     };
   }, []);
-  const livePreview = useExperienceLivePreview({ previewSessionOptions });
-
   useEffect(() => {
     if (!configuration) {
       return;
@@ -138,29 +138,46 @@ export const ExperiencesPreviewApp = () => {
   }, [previewSessionOptions]);
 
   useEffect(() => {
-    if (!livePreview.data) {
+    if (!previewSessionOptions) {
+      sendPreviewStatus("static");
       return;
     }
 
     let isCurrent = true;
+    const livePreviewClient = createLivePreviewClient(previewSessionOptions);
+    const unsubscribeStatus = livePreviewClient.subscribeStatus(sendPreviewStatus);
+    const unsubscribe = livePreviewClient.subscribe(() => {
+      const { data, error: connectionError } = livePreviewClient.getResult();
 
-    void resolveExperience(livePreview.data, experienceConfig).then(
-      (loadedPlan) => {
-        if (isCurrent) {
-          setPlan(loadedPlan);
-        }
-      },
-      (reason: unknown) => {
-        if (isCurrent) {
-          setError(errorMessage(reason));
-        }
-      },
-    );
+      if (connectionError) {
+        setLivePreviewError(errorMessage(connectionError));
+        return;
+      }
+      if (!data) {
+        return;
+      }
+
+      void resolveExperience(data, experienceConfig).then(
+        (updatedPlan) => {
+          if (isCurrent) {
+            setLivePreviewError(undefined);
+            setPlan(updatedPlan);
+          }
+        },
+        (reason: unknown) => {
+          if (isCurrent) {
+            setLivePreviewError(errorMessage(reason));
+          }
+        },
+      );
+    });
 
     return () => {
       isCurrent = false;
+      unsubscribe();
+      unsubscribeStatus();
     };
-  }, [livePreview.data]);
+  }, [previewSessionOptions]);
 
   if (!configuration) {
     return (
@@ -182,7 +199,7 @@ export const ExperiencesPreviewApp = () => {
 
   return (
     <>
-      {livePreview.error && (
+      {livePreviewError && (
         <SetupMessage>
           The Live Preview connection was interrupted. The last rendered
           Experience remains visible.

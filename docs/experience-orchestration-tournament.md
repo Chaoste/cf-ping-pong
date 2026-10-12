@@ -43,11 +43,11 @@ Experience is published; this is required by XO's data-assembly membership valid
    npm start
    ```
 
-`REACT_APP_EXPERIENCES_PREVIEW=true` is the dashboard feature flag. Set it for the
-preview deployment associated with this Contentful space; when it is `false`, this build
-continues to render the Marketplace App UI. The renderer resolves the live Experience
-plan, dispatches the registered XO component IDs to the local React components, and
-recursively renders XO slots. It does not query the Tournament content separately.
+The dashboard activates only when the URL includes an `experience_id` or the
+`preview_session_id` that Contentful supplies. All other URLs continue to render the
+Marketplace App UI. The renderer resolves the live Experience plan, dispatches the
+registered XO component IDs to the local React components, and recursively renders XO
+slots. It does not query the Tournament content separately.
 
 When Contentful opens the renderer with a `preview_session_id`, it uses the Experiences
 SDK's Live Preview client: it fetches the Preview Session snapshot, subscribes to that
@@ -63,7 +63,6 @@ additional runtime configuration file. Configure the following Vercel environmen
 variables for the dashboard deployment, then redeploy whenever one changes:
 
 ```sh
-REACT_APP_EXPERIENCES_PREVIEW=true
 REACT_APP_CONTENTFUL_SPACE_ID=nxkmoddzhouk
 REACT_APP_CONTENTFUL_ENVIRONMENT_ID=cf-tournament-2026-10-15
 REACT_APP_CONTENTFUL_DELIVERY_TOKEN=<delivery token>
@@ -76,7 +75,7 @@ Create a Contentful preview environment for the Vercel URL with the `tournament`
 content-type configuration and the URL
 `https://<deployment>/?experience_id=ping-pong-dashboard`. Contentful adds the
 Preview Session parameters when opening Experience, Component, or Template Editor;
-the Live Preview hook consumes those parameters automatically.
+the Live Preview client consumes those parameters automatically.
 
 ## Current tournament behavior
 
