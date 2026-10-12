@@ -71,11 +71,22 @@ REACT_APP_CONTENTFUL_USE_PREVIEW=true
 REACT_APP_CONTENTFUL_EXPERIENCE_ID=ping-pong-dashboard
 ```
 
-Create a Contentful preview environment for the Vercel URL with the `tournament`
-content-type configuration and the URL
-`https://<deployment>/?experience_id=ping-pong-dashboard`. Contentful adds the
-Preview Session parameters when opening Experience, Component, or Template Editor;
-the Live Preview client consumes those parameters automatically.
+Create Preview Environments at space level for both the local and hosted URLs. Scope
+each configuration to the Experience's template, `tournament-dashboard`; do not use
+the `tournament` content type or an entry target. The Contentful UI calls this an
+Experience target, while the Management API represents it as `Template`:
+
+```json
+{
+  "url": "https://<deployment>/?experience_id=ping-pong-dashboard",
+  "entityType": "Template",
+  "entityId": "tournament-dashboard",
+  "enabled": true
+}
+```
+
+Contentful adds Preview Session parameters when opening Experience, Component, or
+Template Editor; the Live Preview client consumes those parameters automatically.
 
 ## Current tournament behavior
 
