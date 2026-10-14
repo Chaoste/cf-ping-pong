@@ -11,6 +11,7 @@ import {
   Stack,
   Text,
   TextInput,
+  Tooltip,
 } from "@contentful/f36-components";
 import { CycleIcon, EditIcon } from "@contentful/f36-icons";
 import { ExperienceCanvasToolbarAppSDK } from "@contentful/app-sdk";
@@ -211,30 +212,32 @@ export const ExperienceToolbar = () => {
 
   return (
     <Stack flexDirection="column" spacing="spacingS" padding="spacingM">
-      <Flex alignItems="center" justifyContent="space-between">
+      <Stack flexDirection="column" spacing="spacingXs">
         <Heading marginBottom="none">Match desk</Heading>
         {tournamentId && (
-          <Flex gap="spacing2Xs">
-            <IconButton
-              aria-label="Refresh matches"
-              icon={<CycleIcon />}
-              isDisabled={tournamentQuery.isFetching}
-              onClick={() => void tournamentQuery.refetch()}
-              size="small"
-              title="Refresh matches"
-              variant="secondary"
-            />
-            <IconButton
-              aria-label="Change tournament"
-              icon={<EditIcon />}
-              onClick={() => void chooseTournament()}
-              size="small"
-              title="Change tournament"
-              variant="secondary"
-            />
+          <Flex gap="spacing2Xs" justifyContent="flex-end">
+            <Tooltip content="Refresh matches" placement="bottom">
+              <IconButton
+                aria-label="Refresh matches"
+                icon={<CycleIcon />}
+                isDisabled={tournamentQuery.isFetching}
+                onClick={() => void tournamentQuery.refetch()}
+                size="small"
+                variant="secondary"
+              />
+            </Tooltip>
+            <Tooltip content="Change tournament" placement="bottom">
+              <IconButton
+                aria-label="Change tournament"
+                icon={<EditIcon />}
+                onClick={() => void chooseTournament()}
+                size="small"
+                variant="secondary"
+              />
+            </Tooltip>
           </Flex>
         )}
-      </Flex>
+      </Stack>
       {!tournamentId && (
         <Stack flexDirection="column" spacing="spacingS">
           <Text>
