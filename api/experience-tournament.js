@@ -1,6 +1,9 @@
 const resourceId = (urn) =>
   typeof urn === "string" ? urn.split("/").at(-1) : undefined;
 
+const isResourceId = (value) =>
+  typeof value === "string" && /^[a-zA-Z0-9_-]+$/.test(value);
+
 const tournamentIdFrom = (parameters) => {
   for (const parameter of Object.values(parameters ?? {})) {
     const resource = parameter?.$literal;
@@ -29,17 +32,24 @@ module.exports = async (request, response) => {
   }
 
   const experienceId = request.query.experienceId;
+  const requestedEnvironmentId = request.query.environment_id;
   console.info("[cf-ping-pong] Backend tournament lookup started.", {
+    environmentId: requestedEnvironmentId,
     experienceId,
   });
-  if (
-    typeof experienceId !== "string" ||
-    !/^[a-zA-Z0-9_-]+$/.test(experienceId)
-  ) {
+  if (!isResourceId(experienceId)) {
     console.warn("[cf-ping-pong] Backend tournament lookup failed: invalid Experience ID.", {
       experienceId,
     });
     response.status(400).json({ error: "A valid experienceId is required." });
+    return;
+  }
+
+  if (requestedEnvironmentId !== undefined && !isResourceId(requestedEnvironmentId)) {
+    console.warn("[cf-ping-pong] Backend tournament lookup failed: invalid environment ID.", {
+      environmentId: requestedEnvironmentId,
+    });
+    response.status(400).json({ error: "A valid environment_id is required." });
     return;
   }
 
@@ -50,10 +60,11 @@ module.exports = async (request, response) => {
     response.status(500).json({ error: "The Contentful server configuration is incomplete." });
     return;
   }
+  const environmentId = requestedEnvironmentId ?? CONTENTFUL_ENVIRONMENT_ID;
 
   try {
     const contentfulResponse = await fetch(
-      `https://api.contentful.com/spaces/${CONTENTFUL_SPACE_ID}/environments/${CONTENTFUL_ENVIRONMENT_ID}/experiences/${experienceId}`,
+      `https://api.contentful.com/spaces/${CONTENTFUL_SPACE_ID}/environments/${environmentId}/experiences/${experienceId}`,
       {
         headers: {
           Authorization: `Bearer ${CONTENTFUL_CMA_TOKEN}`,
@@ -64,6 +75,7 @@ module.exports = async (request, response) => {
 
     if (!contentfulResponse.ok) {
       console.warn("[cf-ping-pong] Backend tournament lookup failed: Contentful rejected the Experience request.", {
+        environmentId,
         experienceId,
         status: contentfulResponse.status,
       });
@@ -78,6 +90,7 @@ module.exports = async (request, response) => {
     if (!dataAssemblyId || !tournamentId) {
       console.warn("[cf-ping-pong] Backend tournament lookup failed: tournament binding missing.", {
         dataAssemblyId,
+        environmentId,
         experienceId,
       });
       response.status(422).json({ error: "The Experience does not define a tournament binding." });
@@ -86,6 +99,7 @@ module.exports = async (request, response) => {
 
     console.info("[cf-ping-pong] Backend tournament lookup succeeded.", {
       dataAssemblyId,
+      environmentId,
       experienceId,
       tournamentId,
     });

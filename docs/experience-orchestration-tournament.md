@@ -110,12 +110,13 @@ Experience target, while the Management API represents it as `Template`:
 
 Contentful adds Preview Session parameters when opening Experience, Component, or
 Template Editor; the Live Preview client consumes those parameters automatically.
-For a cloned environment, configure a separate Preview Environment with an
-`environment_id` query parameter. It overrides the deployment's default without
-changing the production configuration:
+Use Contentful's `{env_id}` Preview Environment placeholder to pass the currently
+opened environment to the renderer. The same Preview Environment therefore works
+for the original environment and any clone; it is not necessary to create one per
+environment. The renderer uses this value in preference to its deployment default:
 
 ```text
-https://<deployment>/?environment_id=cf-tournament-demo-2026-10-14
+https://<deployment>/?environment_id={env_id}
 ```
 
 ## Current tournament behavior

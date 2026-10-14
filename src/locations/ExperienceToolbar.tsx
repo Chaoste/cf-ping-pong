@@ -94,10 +94,14 @@ const getExperienceTournamentId = async (
 
   console.info("[cf-ping-pong] Backend tournament lookup started.", {
     endpoint: experienceLookupUrl,
+    environmentId: sdk.ids.environment,
     experienceId,
   });
   const response = await fetch(
-    `${experienceLookupUrl}?${new URLSearchParams({ experienceId })}`,
+    `${experienceLookupUrl}?${new URLSearchParams({
+      environment_id: sdk.ids.environment,
+      experienceId,
+    })}`,
   );
   if (!response.ok) {
     throw new Error(`Experience lookup failed (${response.status}).`);
@@ -193,7 +197,7 @@ export const ExperienceToolbar = () => {
   const [chosenTournamentId, setChosenTournamentId] = useState<string>();
   const tournamentId = selectedTournamentId ?? chosenTournamentId;
   const tournamentQuery = useQuery(
-    ["experience-toolbar-tournament", tournamentId],
+    ["experience-toolbar-tournament", sdk.ids.environment, tournamentId],
     () => loadTournamentMatches(sdk, tournamentId!),
     { enabled: tournamentId !== undefined },
   );
