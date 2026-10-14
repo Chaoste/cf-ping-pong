@@ -94,6 +94,7 @@ describe("tournament status helpers", () => {
         {
           matchNumber: "UB 1.1",
           player1Name: "Player 1",
+          player1ProfilePictureUrl: "https://images.example.com/player-1.png",
           player2Name: "Player 2",
           round: 1,
           roundMatchIndex: 1,
@@ -104,7 +105,15 @@ describe("tournament status helpers", () => {
 
     expect(data).toMatchObject({
       tournamentName: "Contentful Pong Cup",
-      matches: [expect.objectContaining({ matchNumber: "UB 1.1" })],
+      matches: [
+        expect.objectContaining({
+          matchNumber: "UB 1.1",
+          player1: {
+            name: "Player 1",
+            profilePictureUrl: "https://images.example.com/player-1.png",
+          },
+        }),
+      ],
     });
   });
 });

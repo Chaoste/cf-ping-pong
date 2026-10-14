@@ -38,9 +38,9 @@ each matching query by choosing **Match** as the data source, keeping its UI-pro
 | Component | `matches` record fields |
 | --- | --- |
 | Tournament status | `winner`, `player1Name` ← `Player 1 → Name`, `player2Name` ← `Player 2 → Name` |
-| Next match | `matchNumber`, `isUpperBracket`, `round`, `roundMatchIndex`, `winner`, `player1Name` ← `Player 1 → Name`, `player2Name` ← `Player 2 → Name` |
+| Next match | `matchNumber`, `isUpperBracket`, `round`, `roundMatchIndex`, `winner`, `player1Name` ← `Player 1 → Name`, `player1ProfilePictureUrl` ← `Player 1 → Profile Picture → URL`, `player2Name` ← `Player 2 → Name`, `player2ProfilePictureUrl` ← `Player 2 → Profile Picture → URL` |
 | Current results | `matchNumber`, `resultSet1`, `resultSet2`, `resultSet3`, `completedAt`, `winner`, `player1Name` ← `Player 1 → Name`, `player2Name` ← `Player 2 → Name` |
-| Tournament bracket | `matchNumber`, `isUpperBracket`, `round`, `roundMatchIndex`, `resultSet1`, `resultSet2`, `resultSet3`, `winner`, `player1Name` ← `Player 1 → Name`, `player2Name` ← `Player 2 → Name` |
+| Tournament bracket | `matchNumber`, `isUpperBracket`, `round`, `roundMatchIndex`, `resultSet1`, `resultSet2`, `resultSet3`, `winner`, `player1Name` ← `Player 1 → Name`, `player1ProfilePictureUrl` ← `Player 1 → Profile Picture → URL`, `player2Name` ← `Player 2 → Name`, `player2ProfilePictureUrl` ← `Player 2 → Profile Picture → URL` |
 
 The bootstrap script registers these contracts and deliberately preserves existing Data
 Assembly links and fragment bindings. It does not overwrite UI-authored bindings with a
@@ -68,16 +68,16 @@ legacy Management API payload.
 
 The dashboard activates only when the URL includes an `experience_id` or the
 `preview_session_id` that Contentful supplies. All other URLs continue to render the
-Marketplace App UI. The Experiences React adapter resolves the live Experience plan,
-dispatches registered XO component IDs to the local React components, and renders XO
+Marketplace App UI. The renderer resolves the live Experience plan, dispatches the
+registered XO component IDs to the local React components, and recursively renders XO
 slots. It does not query the Tournament content separately.
 
 When Contentful opens the renderer with a `preview_session_id`, it uses the Experiences
-React adapter's `useLivePreview` hook: it fetches the Preview Session snapshot,
-subscribes to that session over WebSocket, and resolves every update into the rendered
-plan. This is the live-preview integration used by the Experience, Component, and
-Template editors; it is not the legacy entry-preview integration. Local and hosted
-Contentful preview environments should point to `/?experience_id=ping-pong-dashboard`.
+SDK's Live Preview client: it fetches the Preview Session snapshot, subscribes to that
+session over WebSocket, and resolves every update into the rendered plan. This is the
+live-preview integration used by the Experience, Component, and Template editors; it
+is not the legacy entry-preview integration. Local and hosted Contentful preview
+environments should point to `/?experience_id=ping-pong-dashboard`.
 
 ## Hosted preview
 

@@ -32,7 +32,7 @@ export const NextMatch = (props: ExperienceComponentProps) => {
         style={{
           display: "grid",
           gap: "8px",
-          gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+          gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 280px), 1fr))",
           marginTop: "10px",
         }}
       >
@@ -46,10 +46,19 @@ export const NextMatch = (props: ExperienceComponentProps) => {
               {match.isUpperBracket ? "Upper" : "Lower"} · Round{" "}
               {match.round ?? "—"}
             </span>
-            <strong style={{ fontSize: "17px" }}>
-              {playerName(match.player1)}{" "}
+            <strong
+              style={{
+                alignItems: "center",
+                display: "flex",
+                fontSize: "15px",
+                gap: "6px",
+                lineHeight: 1.15,
+                minWidth: 0,
+              }}
+            >
+              <Player participant={match.player1} />
               <span style={{ color: "#b7c6ff", fontSize: "12px" }}>vs</span>{" "}
-              {playerName(match.player2)}
+              <Player participant={match.player2} />
             </strong>
           </article>
         ))}
@@ -57,6 +66,42 @@ export const NextMatch = (props: ExperienceComponentProps) => {
     </section>
   );
 };
+
+const Player = ({
+  participant,
+}: {
+  participant?: { name?: string | null; profilePictureUrl?: string | null } | null;
+}) => (
+  <span
+    style={{
+      alignItems: "center",
+      display: "inline-flex",
+      flex: "1 1 0",
+      gap: "6px",
+      minWidth: 0,
+    }}
+  >
+    {participant?.profilePictureUrl && (
+      <img
+        alt=""
+        height={24}
+        src={participant.profilePictureUrl}
+        style={{ borderRadius: "50%", objectFit: "cover" }}
+        width={24}
+      />
+    )}
+    <span
+      style={{
+        display: "-webkit-box",
+        overflow: "hidden",
+        WebkitBoxOrient: "vertical",
+        WebkitLineClamp: 2,
+      }}
+    >
+      {playerName(participant)}
+    </span>
+  </span>
+);
 
 const cardStyle = {
   background: "#18233d",

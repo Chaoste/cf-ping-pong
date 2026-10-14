@@ -1,4 +1,4 @@
-import { cloneElement, useRef } from "react";
+import { cloneElement } from "react";
 import {
   createTheme,
   DoubleEliminationBracket,
@@ -9,7 +9,6 @@ import type {
   ParticipantType,
   SvgViewerProps,
 } from "@g-loot/react-tournament-brackets";
-import useComponentSize from "@rehooks/component-size";
 import type { CSSProperties, ReactElement, SVGProps } from "react";
 import type { ExperienceComponentProps } from "../componentTypes";
 import { toDoubleEliminationMatches } from "../tournamentBracket";
@@ -41,16 +40,13 @@ export const TournamentBracket = (props: ExperienceComponentProps) => {
 const BracketTree = ({
   matches,
 }: ReturnType<typeof toDoubleEliminationMatches>) => {
-  const wrapperRef = useRef<HTMLDivElement>(null);
-  const wrapperSize = useComponentSize(wrapperRef);
-
   return (
     <div
-      ref={wrapperRef}
       style={{
         height: "min(940px, 84vh)",
         marginTop: "8px",
         minHeight: "520px",
+        minWidth: 0,
         overflow: "hidden",
         width: "100%",
       }}
@@ -62,9 +58,9 @@ const BracketTree = ({
         options={
           {
             style: {
-              boxHeight: 90,
+              boxHeight: 104,
               canvasPadding: 12,
-              connectorColor: "#cfe8fb",
+              connectorColor: "#53627c",
               connectorColorHighlight: "#9473ed",
               horizontalOffset: 8,
               lineInfo: {
@@ -80,14 +76,12 @@ const BracketTree = ({
               roundSeparatorWidth: 10,
               spaceBetweenColumns: 14,
               spaceBetweenRows: 14,
-              width: 210,
+              width: 250,
             },
           } as { style: OptionsType }
         }
         svgWrapper={({ children, bracketHeight, bracketWidth }) => (
           <FittedBracketSvg
-            availableHeight={Math.max(wrapperSize.height, 480)}
-            availableWidth={Math.max(wrapperSize.width, 320)}
             bracketHeight={bracketHeight}
             bracketWidth={bracketWidth}
           >
@@ -103,23 +97,14 @@ const BracketTree = ({
 type FittedBracketSvgProps = Pick<
   SvgViewerProps,
   "bracketHeight" | "bracketWidth"
-> & {
-  availableHeight: number;
-  availableWidth: number;
-  children: ReactElement<SVGProps<SVGSVGElement>>;
-};
+> & { children: ReactElement<SVGProps<SVGSVGElement>> };
 
 const FittedBracketSvg = ({
-  availableHeight,
-  availableWidth,
   bracketHeight,
   bracketWidth,
   children,
 }: FittedBracketSvgProps) => {
-  const scale = Math.min(
-    availableHeight / bracketHeight,
-    availableWidth / bracketWidth,
-  );
+  const scale = 0.75;
   const scaledHeight = bracketHeight * scale;
   const scaledWidth = bracketWidth * scale;
 
@@ -164,7 +149,7 @@ const MatchParticipant = ({
   participant,
   won,
 }: {
-  participant: ParticipantType;
+  participant: ParticipantType & { profilePictureUrl?: string | null };
   won: boolean;
 }) => {
   const isMissingOpponent = participant.name === "No opponent — match skipped";
@@ -180,7 +165,18 @@ const MatchParticipant = ({
             : undefined),
       }}
     >
-      <span style={participantNameStyle}>{participant.name || "TBD"}</span>
+      <span style={participantNameStyle}>
+        {participant.profilePictureUrl && (
+          <img
+            alt=""
+            height={30}
+            src={participant.profilePictureUrl}
+            style={avatarStyle}
+            width={30}
+          />
+        )}
+        <span style={participantTextStyle}>{participant.name || "TBD"}</span>
+      </span>
       {participant.resultText && (
         <span style={scoreStyle}>{participant.resultText}</span>
       )}
@@ -189,61 +185,62 @@ const MatchParticipant = ({
 };
 
 const bracketTheme = createTheme({
-  border: { color: "#cfe8fb", highlightedColor: "#9473ed" },
-  connectorColor: "#cfe8fb",
+  border: { color: "#3a4b6c", highlightedColor: "#9473ed" },
+  connectorColor: "#53627c",
   connectorColorHighlight: "#9473ed",
-  matchBackground: { lostColor: "#cfe8fb", wonColor: "#b6dca7" },
+  matchBackground: { lostColor: "#22304e", wonColor: "#294c42" },
   roundHeader: { fontColor: "#ffffff" },
   roundHeaders: { background: "#9473ed" },
   score: {
-    background: { lostColor: "#ffffff", wonColor: "#e7f5e1" },
-    text: { highlightedLostColor: "#a32626", highlightedWonColor: "#164c2e" },
+    background: { lostColor: "#22304e", wonColor: "#294c42" },
+    text: { highlightedLostColor: "#ffffff", highlightedWonColor: "#ffffff" },
   },
-  svgBackground: "#ffffff",
-  textColor: { dark: "#53627c", highlighted: "#07090d", main: "#1f2a44" },
+  svgBackground: "#18233d",
+  textColor: { dark: "#b7c6ff", highlighted: "#ffffff", main: "#ffffff" },
 });
 
 const sectionStyle = {
-  background: "#ffffff",
-  border: "1px solid #d3d9e5",
+  background: "#18233d",
+  border: "1px solid #22304e",
   borderRadius: "16px",
-  color: "#1f2a44",
+  color: "#ffffff",
+  minWidth: 0,
   padding: "16px",
 };
 
 const eyebrowStyle = {
-  color: "#53627c",
+  color: "#b7c6ff",
   fontSize: "12px",
   fontWeight: 700,
   margin: "0 0 4px",
 };
 
 const bracketViewportStyle: CSSProperties = {
-  alignItems: "center",
+  alignItems: "flex-start",
   display: "flex",
   height: "100%",
-  justifyContent: "center",
-  overflow: "hidden",
+  justifyContent: "flex-start",
+  overflow: "auto",
   width: "100%",
 };
 
 const matchCardStyle: CSSProperties = {
-  background: "#ffffff",
-  border: "2px solid #cfe8fb",
-  borderRadius: "6px",
-  boxShadow: "0 1px 2px rgba(31, 42, 68, 0.08)",
+  background: "#22304e",
+  border: "2px solid #3a4b6c",
+  borderRadius: "8px",
+  boxShadow: "0 2px 6px rgba(0, 0, 0, 0.2)",
   boxSizing: "border-box",
-  color: "#1f2a44",
-  fontFamily: "Arial, Helvetica, sans-serif",
+  color: "#ffffff",
+  fontFamily: "system-ui, sans-serif",
   height: "100%",
   overflow: "hidden",
   width: "100%",
 };
 
 const matchTitleStyle: CSSProperties = {
-  background: "#f3f6fb",
-  color: "#53627c",
-  fontSize: "18px",
+  background: "#2c3c5d",
+  color: "#cbd6ff",
+  fontSize: "16px",
   fontWeight: 700,
   height: "26px",
   letterSpacing: "0.02em",
@@ -253,38 +250,53 @@ const matchTitleStyle: CSSProperties = {
 
 const matchParticipantStyle: CSSProperties = {
   alignItems: "center",
-  background: "#dff0ff",
-  borderTop: "1px solid #cfe8fb",
+  background: "#22304e",
+  borderTop: "1px solid #3a4b6c",
   boxSizing: "border-box",
   display: "flex",
-  fontSize: "22px",
-  height: "30px",
+  fontSize: "18px",
+  height: "36px",
   justifyContent: "space-between",
   lineHeight: "1",
   padding: "0 9px",
 };
 
 const winningParticipantStyle: CSSProperties = {
-  background: "#dff0d5",
-  color: "#164c2e",
+  background: "#294c42",
+  color: "#ffffff",
   fontWeight: 700,
 };
 
 const missingParticipantStyle: CSSProperties = {
-  background: "#f0f2f5",
-  color: "#697586",
-  fontSize: "18px",
+  background: "#27334d",
+  color: "#b7c6ff",
+  fontSize: "16px",
   fontStyle: "italic",
 };
 
 const participantNameStyle: CSSProperties = {
+  alignItems: "center",
+  display: "flex",
+  flex: "1 1 auto",
+  gap: "7px",
+  minWidth: 0,
+};
+
+const participantTextStyle: CSSProperties = {
   overflow: "hidden",
   textOverflow: "ellipsis",
   whiteSpace: "nowrap",
 };
 
 const scoreStyle: CSSProperties = {
-  fontSize: "22px",
+  fontSize: "18px",
   fontWeight: 700,
   marginLeft: "8px",
+};
+
+const avatarStyle: CSSProperties = {
+  border: "1px solid #b7c6ff",
+  borderRadius: "50%",
+  flex: "0 0 auto",
+  objectFit: "cover",
 };
