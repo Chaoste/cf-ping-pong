@@ -5,12 +5,14 @@ import {
   Flex,
   FormControl,
   Heading,
+  IconButton,
   Notification,
   Skeleton,
   Stack,
   Text,
   TextInput,
 } from "@contentful/f36-components";
+import { CycleIcon, EditIcon } from "@contentful/f36-icons";
 import { ExperienceCanvasToolbarAppSDK } from "@contentful/app-sdk";
 import { useSDK } from "@contentful/react-apps-toolkit";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -208,17 +210,30 @@ export const ExperienceToolbar = () => {
   };
 
   return (
-    <Stack flexDirection="column" spacing="spacingM" padding="spacingM">
+    <Stack flexDirection="column" spacing="spacingS" padding="spacingM">
       <Flex alignItems="center" justifyContent="space-between">
         <Heading marginBottom="none">Match desk</Heading>
-        <Button
-          isDisabled={!tournamentId || tournamentQuery.isFetching}
-          onClick={() => void tournamentQuery.refetch()}
-          size="small"
-          variant="secondary"
-        >
-          Refresh
-        </Button>
+        {tournamentId && (
+          <Flex gap="spacing2Xs">
+            <IconButton
+              aria-label="Refresh matches"
+              icon={<CycleIcon />}
+              isDisabled={tournamentQuery.isFetching}
+              onClick={() => void tournamentQuery.refetch()}
+              size="small"
+              title="Refresh matches"
+              variant="secondary"
+            />
+            <IconButton
+              aria-label="Change tournament"
+              icon={<EditIcon />}
+              onClick={() => void chooseTournament()}
+              size="small"
+              title="Change tournament"
+              variant="secondary"
+            />
+          </Flex>
+        )}
       </Flex>
       {!tournamentId && (
         <Stack flexDirection="column" spacing="spacingS">
@@ -250,19 +265,12 @@ export const ExperienceToolbar = () => {
                     "Tournament"}
                 </Heading>
               </Box>
-              <Button
-                onClick={() => void chooseTournament()}
-                size="small"
-                variant="secondary"
-              >
-                Change
-              </Button>
             </Flex>
           </Box>
           {readyMatches.length === 0 ? (
             <Text>No matches are ready to report right now.</Text>
           ) : (
-            <Stack flexDirection="column" spacing="spacingM">
+            <Stack flexDirection="column" spacing="spacingS">
               {readyMatches.map((match) => (
                 <MatchResultCard
                   key={match.sys.id}
@@ -317,8 +325,8 @@ const MatchResultCard = ({
   };
 
   return (
-    <Card>
-      <Stack flexDirection="column" spacing="spacingM">
+    <Card padding="none">
+      <Stack flexDirection="column" padding="spacingS" spacing="spacingS">
         <Box>
           <Heading as="h3" marginBottom="none">
             {match.fields.matchNumber?.["en-US"] ?? "Match"}
@@ -328,10 +336,11 @@ const MatchResultCard = ({
             {match.fields.round?.["en-US"] ?? "—"}
           </Text>
         </Box>
-        <Flex flexDirection="column" gap="spacingXs">
+        <Flex flexDirection="column" gap="spacing2Xs">
           <Button
             isDisabled={isSaving}
             onClick={() => setWinner(true)}
+            size="small"
             variant={winner === true ? "positive" : "secondary"}
           >
             {player1Name} won
@@ -339,19 +348,22 @@ const MatchResultCard = ({
           <Button
             isDisabled={isSaving}
             onClick={() => setWinner(false)}
+            size="small"
             variant={winner === false ? "positive" : "secondary"}
           >
             {player2Name} won
           </Button>
         </Flex>
-        <Flex gap="spacingXs">
+        <Flex gap="spacing2Xs">
           {scoreFields.map((field, index) => (
             <FormControl key={field} isInvalid={
               scores[field] !== undefined &&
               scores[field].trim() !== "" &&
               !normalizeScore(scores[field])
             }>
-              <FormControl.Label>Set {index + 1}</FormControl.Label>
+              <FormControl.Label marginBottom="spacing2Xs">
+                Set {index + 1}
+              </FormControl.Label>
               <TextInput
                 aria-label={`Set ${index + 1} score`}
                 isDisabled={isSaving}
@@ -362,6 +374,7 @@ const MatchResultCard = ({
                   }))
                 }
                 placeholder="11 - 8"
+                size="small"
                 value={scores[field] ?? ""}
               />
             </FormControl>
@@ -374,6 +387,7 @@ const MatchResultCard = ({
           isDisabled={winner === undefined || hasInvalidScore}
           isLoading={isSaving}
           onClick={() => void save()}
+          size="small"
           variant="positive"
         >
           Record result
