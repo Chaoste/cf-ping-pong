@@ -67,7 +67,11 @@ const normalizeScore = (score: string) => {
   return match ? `${match[1]} - ${match[2]}` : undefined;
 };
 
-const getTournamentId = async (sdk: ExperienceCanvasToolbarAppSDK) => {
+const experienceLookupUrl =
+  process.env.REACT_APP_EXPERIENCE_LOOKUP_URL ??
+  "https://cf-ping-pong.vercel.app/api/experience-tournament";
+
+const getSelectedTournamentId = async (sdk: ExperienceCanvasToolbarAppSDK) => {
   const selection = sdk.experiences.experience.selection.get();
   if (!selection.nodeId) {
     return undefined;
@@ -83,18 +87,48 @@ const getTournamentId = async (sdk: ExperienceCanvasToolbarAppSDK) => {
   )?.binding?.entryId;
 };
 
+const getExperienceTournamentId = async (
+  sdk: ExperienceCanvasToolbarAppSDK,
+) => {
+  const experienceId = sdk.experiences.experience.getSys().id;
+  const response = await fetch(
+    `${experienceLookupUrl}?${new URLSearchParams({ experienceId })}`,
+  );
+  if (!response.ok) {
+    throw new Error(`Experience lookup failed (${response.status}).`);
+  }
+
+  const data: unknown = await response.json();
+  if (
+    typeof data !== "object" ||
+    data === null ||
+    typeof (data as { tournamentId?: unknown }).tournamentId !== "string"
+  ) {
+    throw new Error("Experience lookup returned no tournament.");
+  }
+
+  return (data as { tournamentId: string }).tournamentId;
+};
+
+const getTournamentId = async (sdk: ExperienceCanvasToolbarAppSDK) =>
+  (await getSelectedTournamentId(sdk)) ?? getExperienceTournamentId(sdk);
+
 const useSelectedTournament = (sdk: ExperienceCanvasToolbarAppSDK) => {
   const [selectedTournamentId, setSelectedTournamentId] = useState<string>();
   const [selectionError, setSelectionError] = useState<string>();
+  const [isResolvingTournament, setIsResolvingTournament] = useState(true);
 
   const updateTournament = useCallback(async () => {
+    setIsResolvingTournament(true);
     try {
       setSelectionError(undefined);
       setSelectedTournamentId(await getTournamentId(sdk));
     } catch (error) {
       console.error("[cf-ping-pong] Could not read the selected component", error);
       setSelectedTournamentId(undefined);
-      setSelectionError("The selected component could not be inspected.");
+      setSelectionError("The tournament could not be selected automatically.");
+    } finally {
+      setIsResolvingTournament(false);
     }
   }, [sdk]);
 
@@ -105,7 +139,7 @@ const useSelectedTournament = (sdk: ExperienceCanvasToolbarAppSDK) => {
     });
   }, [sdk.experiences.experience.selection, updateTournament]);
 
-  return { selectedTournamentId, selectionError };
+  return { isResolvingTournament, selectedTournamentId, selectionError };
 };
 
 const loadTournamentMatches = async (
@@ -148,7 +182,8 @@ export const ExperienceToolbar = () => {
     return () => sdk.window.stopAutoResizer();
   }, [sdk.window]);
 
-  const { selectedTournamentId, selectionError } = useSelectedTournament(sdk);
+  const { isResolvingTournament, selectedTournamentId, selectionError } =
+    useSelectedTournament(sdk);
   const [chosenTournamentId, setChosenTournamentId] = useState<string>();
   const tournamentId = selectedTournamentId ?? chosenTournamentId;
   const tournamentQuery = useQuery(
@@ -244,7 +279,11 @@ export const ExperienceToolbar = () => {
             {selectionError ??
               "Select a tournament dashboard component, or choose the tournament to manage."}
           </Text>
-          <Button onClick={() => void chooseTournament()} variant="secondary">
+          <Button
+            isLoading={isResolvingTournament}
+            onClick={() => void chooseTournament()}
+            variant="secondary"
+          >
             Choose tournament
           </Button>
         </Stack>
