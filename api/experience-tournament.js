@@ -21,15 +21,24 @@ module.exports = async (request, response) => {
   }
 
   if (request.method !== "GET") {
+    console.warn("[cf-ping-pong] Backend tournament lookup failed: unsupported method.", {
+      method: request.method,
+    });
     response.status(405).json({ error: "Only GET requests are supported." });
     return;
   }
 
   const experienceId = request.query.experienceId;
+  console.info("[cf-ping-pong] Backend tournament lookup started.", {
+    experienceId,
+  });
   if (
     typeof experienceId !== "string" ||
     !/^[a-zA-Z0-9_-]+$/.test(experienceId)
   ) {
+    console.warn("[cf-ping-pong] Backend tournament lookup failed: invalid Experience ID.", {
+      experienceId,
+    });
     response.status(400).json({ error: "A valid experienceId is required." });
     return;
   }
@@ -37,6 +46,7 @@ module.exports = async (request, response) => {
   const { CONTENTFUL_CMA_TOKEN, CONTENTFUL_ENVIRONMENT_ID, CONTENTFUL_SPACE_ID } =
     process.env;
   if (!CONTENTFUL_CMA_TOKEN || !CONTENTFUL_ENVIRONMENT_ID || !CONTENTFUL_SPACE_ID) {
+    console.error("[cf-ping-pong] Backend tournament lookup failed: incomplete configuration.");
     response.status(500).json({ error: "The Contentful server configuration is incomplete." });
     return;
   }
@@ -53,6 +63,10 @@ module.exports = async (request, response) => {
     );
 
     if (!contentfulResponse.ok) {
+      console.warn("[cf-ping-pong] Backend tournament lookup failed: Contentful rejected the Experience request.", {
+        experienceId,
+        status: contentfulResponse.status,
+      });
       response.status(contentfulResponse.status).json({ error: "The Experience could not be loaded." });
       return;
     }
@@ -62,10 +76,19 @@ module.exports = async (request, response) => {
     const tournamentId = tournamentIdFrom(experience.contentBindings?.parameters);
 
     if (!dataAssemblyId || !tournamentId) {
+      console.warn("[cf-ping-pong] Backend tournament lookup failed: tournament binding missing.", {
+        dataAssemblyId,
+        experienceId,
+      });
       response.status(422).json({ error: "The Experience does not define a tournament binding." });
       return;
     }
 
+    console.info("[cf-ping-pong] Backend tournament lookup succeeded.", {
+      dataAssemblyId,
+      experienceId,
+      tournamentId,
+    });
     response.status(200).json({ dataAssemblyId, tournamentId });
   } catch (error) {
     console.error("[cf-ping-pong] Could not load the Experience binding", error);

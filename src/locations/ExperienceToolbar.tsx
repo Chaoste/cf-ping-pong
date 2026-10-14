@@ -71,26 +71,31 @@ const experienceLookupUrl =
   process.env.REACT_APP_EXPERIENCE_LOOKUP_URL ??
   "https://cf-ping-pong-git-f-861b22-thomas-kellermeiers-projects-be0cbd2c.vercel.app/api/experience-tournament";
 
-const getSelectedTournamentId = async (sdk: ExperienceCanvasToolbarAppSDK) => {
-  const selection = sdk.experiences.experience.selection.get();
-  if (!selection.nodeId) {
-    return undefined;
-  }
-
-  const node = sdk.experiences.experience.getNode(selection.nodeId);
-  const properties = await node?.getProperties();
-  return properties?.find(
-    (property) =>
-      property.area === "content" &&
-      property.key === "matches" &&
-      property.binding?.fieldId === "matches",
-  )?.binding?.entryId;
+type TournamentLookupResponse = {
+  dataAssemblyId: string;
+  tournamentId: string;
 };
+
+const isTournamentLookupResponse = (
+  value: unknown,
+): value is TournamentLookupResponse =>
+  typeof value === "object" &&
+  value !== null &&
+  typeof (value as TournamentLookupResponse).dataAssemblyId === "string" &&
+  typeof (value as TournamentLookupResponse).tournamentId === "string";
 
 const getExperienceTournamentId = async (
   sdk: ExperienceCanvasToolbarAppSDK,
 ) => {
-  const experienceId = sdk.experiences.experience.getSys().id;
+  const { entityId: experienceId, type } = sdk.experiences.context;
+  if (type !== "experience") {
+    throw new Error("Tournament lookup is only available for Experiences.");
+  }
+
+  console.info("[cf-ping-pong] Backend tournament lookup started.", {
+    endpoint: experienceLookupUrl,
+    experienceId,
+  });
   const response = await fetch(
     `${experienceLookupUrl}?${new URLSearchParams({ experienceId })}`,
   );
@@ -99,21 +104,19 @@ const getExperienceTournamentId = async (
   }
 
   const data: unknown = await response.json();
-  if (
-    typeof data !== "object" ||
-    data === null ||
-    typeof (data as { tournamentId?: unknown }).tournamentId !== "string"
-  ) {
+  if (!isTournamentLookupResponse(data)) {
     throw new Error("Experience lookup returned no tournament.");
   }
 
-  return (data as { tournamentId: string }).tournamentId;
+  console.info("[cf-ping-pong] Backend tournament lookup succeeded.", {
+    dataAssemblyId: data.dataAssemblyId,
+    experienceId,
+    tournamentId: data.tournamentId,
+  });
+  return data.tournamentId;
 };
 
-const getTournamentId = async (sdk: ExperienceCanvasToolbarAppSDK) =>
-  (await getSelectedTournamentId(sdk)) ?? getExperienceTournamentId(sdk);
-
-const useSelectedTournament = (sdk: ExperienceCanvasToolbarAppSDK) => {
+const useExperienceTournament = (sdk: ExperienceCanvasToolbarAppSDK) => {
   const [selectedTournamentId, setSelectedTournamentId] = useState<string>();
   const [selectionError, setSelectionError] = useState<string>();
   const [isResolvingTournament, setIsResolvingTournament] = useState(true);
@@ -122,9 +125,12 @@ const useSelectedTournament = (sdk: ExperienceCanvasToolbarAppSDK) => {
     setIsResolvingTournament(true);
     try {
       setSelectionError(undefined);
-      setSelectedTournamentId(await getTournamentId(sdk));
+      setSelectedTournamentId(await getExperienceTournamentId(sdk));
     } catch (error) {
-      console.error("[cf-ping-pong] Could not read the selected component", error);
+      console.warn(
+        "[cf-ping-pong] Backend tournament lookup failed; manual selection remains available.",
+        error,
+      );
       setSelectedTournamentId(undefined);
       setSelectionError("The tournament could not be selected automatically.");
     } finally {
@@ -134,10 +140,10 @@ const useSelectedTournament = (sdk: ExperienceCanvasToolbarAppSDK) => {
 
   useEffect(() => {
     void updateTournament();
-    return sdk.experiences.experience.selection.onChange(() => {
+    return sdk.experiences.onContextChanged(() => {
       void updateTournament();
     });
-  }, [sdk.experiences.experience.selection, updateTournament]);
+  }, [sdk.experiences, updateTournament]);
 
   return { isResolvingTournament, selectedTournamentId, selectionError };
 };
@@ -183,7 +189,7 @@ export const ExperienceToolbar = () => {
   }, [sdk.window]);
 
   const { isResolvingTournament, selectedTournamentId, selectionError } =
-    useSelectedTournament(sdk);
+    useExperienceTournament(sdk);
   const [chosenTournamentId, setChosenTournamentId] = useState<string>();
   const tournamentId = selectedTournamentId ?? chosenTournamentId;
   const tournamentQuery = useQuery(
@@ -250,7 +256,7 @@ export const ExperienceToolbar = () => {
       <Flex alignItems="center" fullWidth gap="spacingS">
         <Heading marginBottom="none">Match desk</Heading>
         {tournamentId && (
-          <Flex gap="spacing2Xs" marginLeft="auto">
+          <Flex alignItems="center" gap="spacing2Xs" marginLeft="auto">
             <Tooltip content="Refresh matches" placement="bottom">
               <IconButton
                 aria-label="Refresh matches"
