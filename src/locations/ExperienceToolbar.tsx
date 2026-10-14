@@ -256,11 +256,16 @@ export const ExperienceToolbar = () => {
   };
 
   return (
-    <Stack flexDirection="column" spacing="spacingS" padding="spacingM">
-      <Flex alignItems="center" fullWidth gap="spacingS">
+    <Stack
+      alignItems="flex-start"
+      flexDirection="column"
+      spacing="spacingS"
+      padding="spacingM"
+    >
+      <Flex alignItems="center" fullWidth gap="spacingS" justifyContent="center">
         <Heading marginBottom="none">Match desk</Heading>
         {tournamentId && (
-          <Flex alignItems="center" gap="spacing2Xs" marginLeft="auto">
+          <Flex alignItems="center" gap="spacing2Xs">
             <Tooltip content="Refresh matches" placement="bottom">
               <IconButton
                 aria-label="Refresh matches"
