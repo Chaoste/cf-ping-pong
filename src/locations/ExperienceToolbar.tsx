@@ -247,10 +247,10 @@ export const ExperienceToolbar = () => {
 
   return (
     <Stack flexDirection="column" spacing="spacingS" padding="spacingM">
-      <Stack flexDirection="column" spacing="spacingXs">
+      <Flex alignItems="center" fullWidth gap="spacingS">
         <Heading marginBottom="none">Match desk</Heading>
         {tournamentId && (
-          <Flex gap="spacing2Xs" justifyContent="flex-end">
+          <Flex gap="spacing2Xs" marginLeft="auto">
             <Tooltip content="Refresh matches" placement="bottom">
               <IconButton
                 aria-label="Refresh matches"
@@ -272,7 +272,7 @@ export const ExperienceToolbar = () => {
             </Tooltip>
           </Flex>
         )}
-      </Stack>
+      </Flex>
       {!tournamentId && (
         <Stack flexDirection="column" spacing="spacingS">
           <Text>
