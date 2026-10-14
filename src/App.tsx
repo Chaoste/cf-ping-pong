@@ -2,8 +2,10 @@ import React, { useMemo } from "react";
 import { locations } from "@contentful/app-sdk";
 import { PageRouter } from "./locations/PageRouter";
 import { useSDK } from "@contentful/react-apps-toolkit";
+import { ExperienceToolbar } from "./locations/ExperienceToolbar";
 
 const ComponentLocationSettings = {
+  [locations.LOCATION_EXPERIENCE_TOOLBAR]: ExperienceToolbar,
   [locations.LOCATION_PAGE]: PageRouter,
 };
 

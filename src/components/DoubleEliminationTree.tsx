@@ -10,8 +10,6 @@ import { MatchEntry, PlayerEntry, TournamentEntry } from "../types";
 import { Link } from "contentful-management";
 import { useSDK } from "@contentful/react-apps-toolkit";
 import { PageAppSDK } from "@contentful/app-sdk";
-import { useParams } from "react-router";
-import { useQueryClient } from "react-query";
 import tokens from "@contentful/f36-tokens";
 import useComponentSize from "@rehooks/component-size";
 
@@ -182,8 +180,6 @@ export const DoubleElimininationTree = ({
   players,
 }: DoubleElimininationTreeProps) => {
   const sdk = useSDK<PageAppSDK>();
-  const { tournamentId } = useParams();
-  const queryClient = useQueryClient();
   const tournamentMatches = tournament.fields.matches["en-US"]
     .map((matchLink) =>
       matches.find((match) => match.sys.id === matchLink.sys.id)
@@ -205,140 +201,19 @@ export const DoubleElimininationTree = ({
   };
 
   const openMatch = async ({ match }: { match: MatchType }) => {
-    let shouldInvalidateMatchQuery = false;
     if (!match.id) return;
-    const matchVersion = matches.find((m) => m.sys.id === match.id)?.sys
-      .version;
-    let { entity: updatedMatch } = await sdk.navigator.openEntry<
-      MatchEntry["fields"]
-    >(match.id, {
-      slideIn: {
-        waitForClose: true,
-      },
+    await sdk.navigator.openEntry<MatchEntry["fields"]>(match.id, {
+      slideIn: true,
     });
-    if (!updatedMatch || updatedMatch?.sys.version === matchVersion) {
-      console.debug(
-        "[cf-ping-pong] No changes detected for the opened match. Rechecking after 2 seconds"
-      );
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      const refetchedMatch = await sdk.cma.entry.get<MatchEntry["fields"]>({
-        entryId: match.id,
-      });
-      if (!refetchedMatch || refetchedMatch?.sys.version === matchVersion) {
-        console.debug(
-          "[cf-ping-pong] No changes detected on the second check",
-          {
-            refetchedMatch,
-          }
-        );
-        return;
-      }
-      updatedMatch = refetchedMatch;
-      shouldInvalidateMatchQuery = true;
-    }
-
-    if (updatedMatch && updatedMatch?.sys.version !== matchVersion) {
-      const nextMatch = matches.find((m) => m.sys.id === match.nextMatchId);
-      const nextLooserMatch = matches.find(
-        (m) => m.sys.id === match.nextLooserMatchId
-      );
-      const winner = updatedMatch.fields.winner?.["en-US"];
-      const wasUnfinished =
-        matches.find((candidate) => candidate.sys.id === match.id)?.fields
-          .winner?.["en-US"] === undefined;
-      const hasTwoPlayers =
-        updatedMatch.fields.player1?.["en-US"] !== undefined &&
-        updatedMatch.fields.player2?.["en-US"] !== undefined;
-
-      if (winner !== undefined && wasUnfinished && hasTwoPlayers) {
-        updatedMatch.fields.completedAt = { "en-US": new Date().toISOString() };
-        updatedMatch = await sdk.cma.entry.update(
-          { entryId: updatedMatch.sys.id },
-          updatedMatch
-        );
-        shouldInvalidateMatchQuery = true;
-      }
-
-      if (winner !== undefined) {
-        const winnerPlayerId = winner
-          ? updatedMatch.fields.player1?.["en-US"]
-          : updatedMatch.fields.player2?.["en-US"];
-        const looserPlayerId = winner
-          ? updatedMatch.fields.player2?.["en-US"]
-          : updatedMatch.fields.player1?.["en-US"];
-        if (nextMatch) {
-          let hasChanged = false;
-          if (
-            !nextMatch.fields.player1?.["en-US"] &&
-            nextMatch.fields.player2?.["en-US"] !== winnerPlayerId
-          ) {
-            nextMatch.fields.player1 = { "en-US": winnerPlayerId };
-            hasChanged = true;
-          } else if (
-            !nextMatch.fields.player2?.["en-US"] &&
-            nextMatch.fields.player1?.["en-US"] !== winnerPlayerId
-          ) {
-            nextMatch.fields.player2 = { "en-US": winnerPlayerId };
-            hasChanged = true;
-          }
-          if (hasChanged) {
-            await sdk.cma.entry.update(
-              { entryId: nextMatch.sys.id },
-              nextMatch
-            );
-            shouldInvalidateMatchQuery = true;
-            console.debug("[cf-ping-pong] Updated next UB match:", {
-              match: nextMatch,
-            });
-          }
-        }
-        if (nextLooserMatch) {
-          let hasChanged = false;
-          if (
-            !nextLooserMatch.fields.player1?.["en-US"] &&
-            nextLooserMatch.fields.player2?.["en-US"] !== looserPlayerId
-          ) {
-            nextLooserMatch.fields.player1 = { "en-US": looserPlayerId };
-            hasChanged = true;
-          } else if (
-            !nextLooserMatch.fields.player2?.["en-US"] &&
-            nextLooserMatch.fields.player1?.["en-US"] !== looserPlayerId
-          ) {
-            nextLooserMatch.fields.player2 = { "en-US": looserPlayerId };
-            hasChanged = true;
-          }
-          if (hasChanged) {
-            await sdk.cma.entry.update(
-              { entryId: nextLooserMatch.sys.id },
-              nextLooserMatch
-            );
-            shouldInvalidateMatchQuery = true;
-            console.debug("[cf-ping-pong] Updated next LB match:", {
-              match: nextLooserMatch,
-            });
-          }
-        }
-      }
-      if (shouldInvalidateMatchQuery) {
-        queryClient.invalidateQueries(["tournaments", tournamentId, "matches"]);
-      }
-    }
   };
 
   const openParty = async (party: { id: string }) => {
     if (!party.id) return;
-    const partyVersion = players.find((p) => p.sys.id === party.id)?.sys
-      .version;
-    const { entity: updatedParty } = await sdk.navigator.openEntry<
-      PlayerEntry["fields"]
-    >(party.id, {
+    await sdk.navigator.openEntry<PlayerEntry["fields"]>(party.id, {
       slideIn: {
         waitForClose: true,
       },
     });
-    if (updatedParty && updatedParty?.sys.version !== partyVersion) {
-      queryClient.invalidateQueries(["players"]);
-    }
   };
 
   // TODO: Text color player #c0c3c8
