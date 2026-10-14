@@ -109,6 +109,7 @@ const toVisualMatch = (
   });
 
   const hasGameFinished = match.fields.winner?.["en-US"] !== undefined;
+  const hasRecordedSetWins = setsWonByPlayer1 > 0 || setsWonByPlayer2 > 0;
   const isPlayerMissing =
     match.fields.player1?.["en-US"] === undefined ||
     match.fields.player2?.["en-US"] === undefined;
@@ -145,7 +146,7 @@ const toVisualMatch = (
               ? match.fields.winner["en-US"] === !Boolean(index)
               : undefined,
           resultText:
-            match.fields.winner?.["en-US"] !== undefined
+            hasGameFinished && hasRecordedSetWins
               ? index === 0
                 ? `${setsWonByPlayer1}`
                 : `${setsWonByPlayer2}`
