@@ -69,7 +69,7 @@ const normalizeScore = (score: string) => {
 
 const experienceLookupUrl =
   process.env.REACT_APP_EXPERIENCE_LOOKUP_URL ??
-  "https://cf-ping-pong.vercel.app/api/experience-tournament";
+  "https://cf-ping-pong-git-f-861b22-thomas-kellermeiers-projects-be0cbd2c.vercel.app/api/experience-tournament";
 
 const getSelectedTournamentId = async (sdk: ExperienceCanvasToolbarAppSDK) => {
   const selection = sdk.experiences.experience.selection.get();
