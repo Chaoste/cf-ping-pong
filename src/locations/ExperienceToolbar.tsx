@@ -139,6 +139,12 @@ const loadTournamentMatches = async (
 
 export const ExperienceToolbar = () => {
   const sdk = useSDK<ExperienceCanvasToolbarAppSDK>();
+
+  useEffect(() => {
+    sdk.window.startAutoResizer();
+    return () => sdk.window.stopAutoResizer();
+  }, [sdk.window]);
+
   const { selectedTournamentId, selectionError } = useSelectedTournament(sdk);
   const [chosenTournamentId, setChosenTournamentId] = useState<string>();
   const tournamentId = selectedTournamentId ?? chosenTournamentId;
