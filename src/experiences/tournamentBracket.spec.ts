@@ -86,5 +86,8 @@ describe("tournament bracket matches", () => {
         { name: "No opponent — match skipped" },
       ],
     });
+    expect(matches.upper[0].participants.map(({ resultText }) => resultText)).toEqual(
+      [undefined, undefined],
+    );
   });
 });

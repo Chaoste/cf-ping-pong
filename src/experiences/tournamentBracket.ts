@@ -98,6 +98,7 @@ const toParticipant = (
   setsWon: [number, number],
 ): ParticipantType => {
   const hasWinner = typeof match.winner === "boolean";
+  const hasRecordedSetWins = setsWon[0] > 0 || setsWon[1] > 0;
 
   return {
     id: `${matchId}-${position + 1}`,
@@ -106,7 +107,7 @@ const toParticipant = (
     status: null,
     ...(hasWinner && {
       isWinner: position === 0 ? match.winner === true : match.winner === false,
-      resultText: String(setsWon[position]),
+      ...(hasRecordedSetWins && { resultText: String(setsWon[position]) }),
     }),
   };
 };

@@ -11,6 +11,7 @@ import {
 } from "@contentful/experiences-sdk-core";
 import { useEffect, useMemo, useState } from "react";
 import { ExperiencePlanRenderer } from "./ExperiencePlanRenderer";
+import { resolvePreviewEnvironmentId } from "./previewEnvironment";
 
 type PreviewConfiguration = {
   deliveryToken: string;
@@ -23,7 +24,10 @@ type PreviewConfiguration = {
 
 const previewConfiguration = (): PreviewConfiguration | undefined => {
   const spaceId = process.env.REACT_APP_CONTENTFUL_SPACE_ID;
-  const environmentId = process.env.REACT_APP_CONTENTFUL_ENVIRONMENT_ID;
+  const environmentId = resolvePreviewEnvironmentId(
+    process.env.REACT_APP_CONTENTFUL_ENVIRONMENT_ID,
+    new URLSearchParams(window.location.search),
+  );
   const deliveryToken = process.env.REACT_APP_CONTENTFUL_DELIVERY_TOKEN;
   const preview = process.env.REACT_APP_CONTENTFUL_USE_PREVIEW !== "false";
   const previewToken = process.env.REACT_APP_CONTENTFUL_PREVIEW_TOKEN;

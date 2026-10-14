@@ -43,11 +43,8 @@ const BracketTree = ({
   return (
     <div
       style={{
-        height: "min(940px, 84vh)",
         marginTop: "8px",
-        minHeight: "520px",
         minWidth: 0,
-        overflow: "hidden",
         width: "100%",
       }}
     >
@@ -218,9 +215,8 @@ const eyebrowStyle = {
 const bracketViewportStyle: CSSProperties = {
   alignItems: "flex-start",
   display: "flex",
-  height: "100%",
   justifyContent: "flex-start",
-  overflow: "auto",
+  overflowX: "auto",
   width: "100%",
 };
 
