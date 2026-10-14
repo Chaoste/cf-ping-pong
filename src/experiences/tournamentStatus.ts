@@ -17,10 +17,12 @@ export type TournamentMatch = {
 };
 
 export type TournamentData = {
+  tournamentName?: string | null;
   matches?: TournamentMatch[] | null;
 };
 
 export type TournamentAssemblyData = {
+  tournamentName?: unknown;
   matches?: unknown;
 };
 
@@ -64,6 +66,7 @@ export const toTournamentData = (
   }
 
   return {
+    tournamentName: nullableString(data.tournamentName),
     matches: Array.isArray(data.matches)
       ? data.matches
           .map(toMatch)

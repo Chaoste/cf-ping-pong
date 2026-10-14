@@ -17,7 +17,7 @@ export const NextMatch = (props: ExperienceComponentProps) => {
     return (
       <section style={cardStyle}>
         <p style={eyebrowStyle}>READY TO PLAY</p>
-        <h2 style={headingStyle}>No matches are ready yet</h2>
+        <h2 style={emptyHeadingStyle}>No matches are ready yet</h2>
         <p style={{ margin: 0 }}>
           Complete an earlier match to advance its players.
         </p>
@@ -28,21 +28,27 @@ export const NextMatch = (props: ExperienceComponentProps) => {
   return (
     <section style={cardStyle}>
       <p style={eyebrowStyle}>READY TO PLAY</p>
-      <h2 style={headingStyle}>Play these matches next</h2>
-      <div style={{ display: "grid", gap: "10px", marginTop: "16px" }}>
+      <div
+        style={{
+          display: "grid",
+          gap: "8px",
+          gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+          marginTop: "10px",
+        }}
+      >
         {matches.map((match, index) => (
           <article
             key={`${match.matchNumber ?? "match"}-${index}`}
             style={matchStyle}
           >
-            <span style={{ color: "#b7c6ff", fontSize: "13px" }}>
+            <span style={{ color: "#b7c6ff", fontSize: "12px" }}>
               {match.matchNumber ?? "Match"} ·{" "}
               {match.isUpperBracket ? "Upper" : "Lower"} · Round{" "}
               {match.round ?? "—"}
             </span>
-            <strong style={{ fontSize: "19px" }}>
+            <strong style={{ fontSize: "17px" }}>
               {playerName(match.player1)}{" "}
-              <span style={{ color: "#b7c6ff", fontSize: "14px" }}>vs</span>{" "}
+              <span style={{ color: "#b7c6ff", fontSize: "12px" }}>vs</span>{" "}
               {playerName(match.player2)}
             </strong>
           </article>
@@ -54,27 +60,27 @@ export const NextMatch = (props: ExperienceComponentProps) => {
 
 const cardStyle = {
   background: "#18233d",
-  borderRadius: "16px",
+  borderRadius: "12px",
   color: "#ffffff",
-  padding: "24px",
+  padding: "16px",
 };
 
 const eyebrowStyle = {
   color: "#b7c6ff",
-  fontSize: "14px",
+  fontSize: "12px",
   fontWeight: 700,
-  margin: "0 0 8px",
+  margin: "0 0 4px",
 };
 
-const headingStyle = {
-  fontSize: "28px",
+const emptyHeadingStyle = {
+  fontSize: "24px",
   margin: "0 0 4px",
 };
 
 const matchStyle = {
   background: "#22304e",
-  borderRadius: "10px",
+  borderRadius: "8px",
   display: "grid",
-  gap: "4px",
-  padding: "12px",
+  gap: "2px",
+  padding: "10px",
 };

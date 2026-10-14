@@ -10,9 +10,9 @@ import {
 const metricStyle = {
   background: "#ffffff",
   border: "1px solid #d3d9e5",
-  borderRadius: "12px",
-  minWidth: "112px",
-  padding: "16px",
+  borderRadius: "10px",
+  minWidth: "104px",
+  padding: "10px 12px",
 };
 
 export const TournamentStatus = (props: ExperienceComponentProps) => {
@@ -31,19 +31,35 @@ export const TournamentStatus = (props: ExperienceComponentProps) => {
   return (
     <section
       style={{
+        alignItems: "center",
         background: "#f1f5ff",
-        borderRadius: "16px",
+        borderRadius: "12px",
         color: "#1f2a44",
-        padding: "24px",
+        display: "flex",
+        flexWrap: "wrap",
+        gap: "16px 24px",
+        padding: "16px",
       }}
     >
-      <p style={{ fontSize: "14px", fontWeight: 700, margin: "0 0 4px" }}>
-        LIVE TOURNAMENT STATUS
-      </p>
-      <h1 style={{ fontSize: "32px", margin: "0 0 20px" }}>
-        Tournament
-      </h1>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: "12px" }}>
+      <div>
+        <p
+          style={{ fontSize: "12px", fontWeight: 700, margin: "0 0 2px" }}
+        >
+          LIVE TOURNAMENT STATUS
+        </p>
+        <h1 style={{ fontSize: "26px", margin: 0 }}>
+          {data.tournamentName ?? "Tournament"}
+        </h1>
+      </div>
+      <div
+        style={{
+          display: "flex",
+          flex: "1 1 auto",
+          flexWrap: "wrap",
+          gap: "8px",
+          justifyContent: "flex-end",
+        }}
+      >
         <Metric
           label="Registered players"
           value={getRegisteredPlayerCount(matches)}
@@ -59,7 +75,7 @@ export const TournamentStatus = (props: ExperienceComponentProps) => {
 
 const Metric = ({ label, value }: { label: string; value: number }) => (
   <div style={metricStyle}>
-    <div style={{ fontSize: "28px", fontWeight: 700 }}>{value}</div>
-    <div style={{ color: "#53627c", fontSize: "14px" }}>{label}</div>
+    <div style={{ fontSize: "24px", fontWeight: 700 }}>{value}</div>
+    <div style={{ color: "#53627c", fontSize: "12px" }}>{label}</div>
   </div>
 );

@@ -47,6 +47,13 @@ const matchFields = {
   winner: { id: "winner", name: "Winner", type: "Boolean" },
 };
 
+const tournamentNameProperty = {
+  id: "tournamentName",
+  name: "Tournament name",
+  required: false,
+  type: "String",
+};
+
 const matchesProperty = (fieldIds) => ({
   id: "matches",
   name: "Matches",
@@ -71,7 +78,10 @@ const dashboardComponents = [
     id: "tournament-status",
     name: "Tournament status",
     description: "Shows participation and live tournament progress.",
-    contentProperties: [matchesProperty(["winner", "player1Name", "player2Name"])],
+    contentProperties: [
+      tournamentNameProperty,
+      matchesProperty(["winner", "player1Name", "player2Name"]),
+    ],
     slots: [],
   },
   {

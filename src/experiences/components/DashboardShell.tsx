@@ -8,10 +8,10 @@ export const DashboardShell = ({ content }: ExperienceComponentProps) => (
       fontFamily: "system-ui, sans-serif",
       margin: 0,
       minHeight: "100vh",
-      padding: "32px 20px 64px",
+      padding: "16px 20px 32px",
     }}
   >
-    <div style={{ display: "grid", gap: "20px", margin: "0 auto", maxWidth: "1200px" }}>
+    <div style={{ display: "grid", gap: "12px", margin: "0 auto", maxWidth: "1600px" }}>
       {content}
     </div>
   </main>

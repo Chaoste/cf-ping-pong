@@ -87,8 +87,9 @@ describe("tournament status helpers", () => {
     ]);
   });
 
-  it("reconstructs tournament data from top-level assembly properties", () => {
+  it("reconstructs the tournament name and matches from top-level assembly properties", () => {
     const data = toTournamentData({
+      tournamentName: "Contentful Pong Cup",
       matches: [
         {
           matchNumber: "UB 1.1",
@@ -102,6 +103,7 @@ describe("tournament status helpers", () => {
     });
 
     expect(data).toMatchObject({
+      tournamentName: "Contentful Pong Cup",
       matches: [expect.objectContaining({ matchNumber: "UB 1.1" })],
     });
   });

@@ -19,14 +19,13 @@ export const CurrentResults = (props: ExperienceComponentProps) => {
 
   return (
     <section style={sectionStyle}>
-      <p style={eyebrowStyle}>RESULTS</p>
-      <h2 style={{ fontSize: "28px", margin: "0 0 16px" }}>Current results</h2>
+      <p style={eyebrowStyle}>CURRENT RESULTS</p>
       {results.length === 0 ? (
         <p style={{ color: "#53627c", margin: 0 }}>
           No results have been recorded yet.
         </p>
       ) : (
-        <div style={{ display: "grid", gap: "8px" }}>
+        <div style={{ display: "grid" }}>
           {results.map((match, index) => {
             const isBye = isWalkover(match);
             const resultScore = score(match);
@@ -37,10 +36,10 @@ export const CurrentResults = (props: ExperienceComponentProps) => {
                   alignItems: "center",
                   borderTop: "1px solid #d3d9e5",
                   display: "grid",
-                  gap: "8px",
+                  gap: "6px",
                   gridTemplateColumns:
-                    "minmax(90px, 0.5fr) minmax(180px, 1fr) minmax(140px, 0.7fr)",
-                  padding: "12px 0",
+                    "minmax(76px, 0.4fr) minmax(180px, 1fr) minmax(140px, 0.7fr)",
+                  padding: "8px 0",
                 }}
               >
                 <strong>{match.matchNumber ?? "Match"}</strong>
@@ -72,14 +71,14 @@ export const CurrentResults = (props: ExperienceComponentProps) => {
 const sectionStyle = {
   background: "#ffffff",
   border: "1px solid #d3d9e5",
-  borderRadius: "16px",
+  borderRadius: "12px",
   color: "#1f2a44",
-  padding: "24px",
+  padding: "16px",
 };
 
 const eyebrowStyle = {
   color: "#53627c",
-  fontSize: "14px",
+  fontSize: "12px",
   fontWeight: 700,
   margin: "0 0 4px",
 };
