@@ -68,16 +68,16 @@ legacy Management API payload.
 
 The dashboard activates only when the URL includes an `experience_id` or the
 `preview_session_id` that Contentful supplies. All other URLs continue to render the
-Marketplace App UI. The renderer resolves the live Experience plan, dispatches the
-registered XO component IDs to the local React components, and recursively renders XO
+Marketplace App UI. The Experiences React adapter resolves the live Experience plan,
+dispatches registered XO component IDs to the local React components, and renders XO
 slots. It does not query the Tournament content separately.
 
 When Contentful opens the renderer with a `preview_session_id`, it uses the Experiences
-SDK's Live Preview client: it fetches the Preview Session snapshot, subscribes to that
-session over WebSocket, and resolves every update into the rendered plan. This is the
-live-preview integration used by the Experience, Component, and Template editors; it is
-not the legacy entry-preview integration. Local and hosted Contentful preview
-environments should point to `/?experience_id=ping-pong-dashboard`.
+React adapter's `useLivePreview` hook: it fetches the Preview Session snapshot,
+subscribes to that session over WebSocket, and resolves every update into the rendered
+plan. This is the live-preview integration used by the Experience, Component, and
+Template editors; it is not the legacy entry-preview integration. Local and hosted
+Contentful preview environments should point to `/?experience_id=ping-pong-dashboard`.
 
 ## Hosted preview
 
