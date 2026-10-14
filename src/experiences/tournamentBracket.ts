@@ -102,6 +102,7 @@ const toParticipant = (
   return {
     id: `${matchId}-${position + 1}`,
     name: bracketPlayerName(player, match),
+    profilePictureUrl: player?.profilePictureUrl ?? null,
     status: null,
     ...(hasWinner && {
       isWinner: position === 0 ? match.winner === true : match.winner === false,

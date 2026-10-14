@@ -1,5 +1,6 @@
 export type TournamentParticipant = {
   name?: string | null;
+  profilePictureUrl?: string | null;
 };
 
 export type TournamentMatch = {
@@ -47,8 +48,14 @@ const toMatch = (value: unknown): TournamentMatch | undefined => {
     completedAt: nullableString(value.completedAt),
     isUpperBracket: nullableBoolean(value.isUpperBracket),
     matchNumber: nullableString(value.matchNumber),
-    player1: { name: nullableString(value.player1Name) },
-    player2: { name: nullableString(value.player2Name) },
+    player1: {
+      name: nullableString(value.player1Name),
+      profilePictureUrl: nullableString(value.player1ProfilePictureUrl),
+    },
+    player2: {
+      name: nullableString(value.player2Name),
+      profilePictureUrl: nullableString(value.player2ProfilePictureUrl),
+    },
     resultSet1: nullableString(value.resultSet1),
     resultSet2: nullableString(value.resultSet2),
     resultSet3: nullableString(value.resultSet3),

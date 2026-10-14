@@ -8,7 +8,10 @@ describe("tournament bracket matches", () => {
         isUpperBracket: true,
         round: 1,
         roundMatchIndex: 1,
-        player1: { name: "Ada" },
+        player1: {
+          name: "Ada",
+          profilePictureUrl: "https://images.example.com/ada.png",
+        },
         player2: { name: "Grace" },
         winner: true,
       },
@@ -47,6 +50,12 @@ describe("tournament bracket matches", () => {
           id: "UB 1.1",
           nextMatchId: "UB 2.1",
           nextLooserMatchId: "LB 1.1",
+          participants: [
+            expect.objectContaining({
+              profilePictureUrl: "https://images.example.com/ada.png",
+            }),
+            expect.any(Object),
+          ],
         }),
       ]),
     );
