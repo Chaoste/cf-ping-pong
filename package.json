@@ -4,6 +4,9 @@
   "private": true,
   "dependencies": {
     "@contentful/app-sdk": "^4.24.0",
+    "@contentful/experiences-client": "^0.9.3",
+    "@contentful/experiences-live-preview": "0.6.3",
+    "@contentful/experiences-sdk-core": "^0.12.2",
     "@contentful/f36-components": "4.58.4",
     "@contentful/f36-icons": "^4.27.0",
     "@contentful/f36-multiselect": "^4.22.0",
@@ -21,6 +24,7 @@
     "react-scripts": "5.0.1"
   },
   "scripts": {
+    "bootstrap:experience-orchestration": "node scripts/bootstrap-experience-orchestration.mjs",
     "start": "cross-env GENERATE_SOURCEMAP=false BROWSER=none react-scripts start",
     "build": "GENERATE_SOURCEMAP=false react-scripts build",
     "test": "GENERATE_SOURCEMAP=false react-scripts test",

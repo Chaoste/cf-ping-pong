@@ -28,6 +28,7 @@ export type Match = {
   resultSet1?: `${number} - ${number}`;
   resultSet2?: `${number} - ${number}`;
   resultSet3?: `${number} - ${number}`;
+  completedAt?: string;
   winner?: boolean;
 };
 

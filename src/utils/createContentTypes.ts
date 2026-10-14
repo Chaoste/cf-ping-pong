@@ -140,6 +140,13 @@ export const createMatchContentType = async (sdk: PageAppSDK) => {
           ],
         },
         {
+          id: "completedAt",
+          name: "Completed At",
+          type: "Date",
+          required: false,
+          localized: false,
+        },
+        {
           id: "isUpperBracket",
           name: "Is Upper Bracket",
           type: "Boolean",

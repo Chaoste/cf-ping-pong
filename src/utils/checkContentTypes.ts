@@ -47,6 +47,7 @@ export const checkMatchReady = async (sdk: PageAppSDK) => {
     "resultSet1",
     "resultSet2",
     "resultSet3",
+    "completedAt",
     "winner",
   ] satisfies Fields<Match>);
 };

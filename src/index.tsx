@@ -5,6 +5,7 @@ import { createRoot } from "react-dom/client";
 import App from "./App";
 import LocalhostWarning from "./components/LocalhostWarning";
 import { QueryClient, QueryClientProvider } from "react-query";
+import { ExperiencesPreviewApp } from "./experiences/ExperiencesPreviewApp";
 
 const container = document.getElementById("root")!;
 const root = createRoot(container);
@@ -16,8 +17,13 @@ const queryClient = new QueryClient({
     },
   },
 });
+const previewQuery = new URLSearchParams(window.location.search);
+const isExperiencePreview =
+  previewQuery.has("experience_id") || previewQuery.has("preview_session_id");
 
-if (process.env.NODE_ENV === "development" && window.self === window.top) {
+if (isExperiencePreview) {
+  root.render(<ExperiencesPreviewApp />);
+} else if (process.env.NODE_ENV === "development" && window.self === window.top) {
   // You can remove this if block before deploying your app
   root.render(<LocalhostWarning />);
 } else {
