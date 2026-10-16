@@ -1,7 +1,8 @@
 # Ping Pong Experience Orchestration dashboard
 
-This repository includes a local React renderer for a native Contentful Experience
-Orchestration (XO) dashboard. It intentionally uses XO Components, a Data Assembly,
+This repository includes a local React preview for a native Contentful Experience
+Orchestration (XO) dashboard. It uses the official
+`@contentful/experiences-react` adapter with XO Components, a Data Assembly,
 Experience Fragments, an Experience Template, and an Experience rather than creating
 presentation content types.
 
@@ -54,8 +55,8 @@ legacy Management API payload.
    `REACT_APP_`, so Create React App does not send the management token to the browser.
 3. Set the `REACT_APP_CONTENTFUL_*` values. For a draft tournament, set
    `REACT_APP_CONTENTFUL_USE_PREVIEW=true` and provide both the Delivery and Preview
-   tokens. The local renderer uses the Contentful Experience Delivery API through
-   `@contentful/experiences-client`.
+   tokens. The local preview uses the Contentful Experience Delivery API through
+   the Experiences React adapter.
 4. Export the values when running the bootstrap script, then start the app:
 
    ```sh
@@ -68,9 +69,9 @@ legacy Management API payload.
 
 The dashboard activates only when the URL includes an `experience_id` or the
 `preview_session_id` that Contentful supplies. All other URLs continue to render the
-Marketplace App UI. The renderer resolves the live Experience plan, dispatches the
-registered XO component IDs to the local React components, and recursively renders XO
-slots. It does not query the Tournament content separately.
+Marketplace App UI. The preview resolves the live Experience plan and passes it to
+the adapter's `ClientExperienceRenderer`, whose component registry renders the local
+XO components and their slots. It does not query the Tournament content separately.
 
 When Contentful opens the renderer with a `preview_session_id`, it uses the Experiences
 SDK's Live Preview client: it fetches the Preview Session snapshot, subscribes to that
