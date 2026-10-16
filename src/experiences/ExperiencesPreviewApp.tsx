@@ -4,13 +4,13 @@ import {
   sendPreviewStatus,
   type PreviewSessionOptions,
 } from "@contentful/experiences-live-preview";
-import { fetchExperience } from "@contentful/experiences-client";
 import {
+  fetchExperience,
   resolveExperience,
   type PortableRenderPlan,
-} from "@contentful/experiences-sdk-core";
+} from "@contentful/experiences-react";
 import { useEffect, useMemo, useState } from "react";
-import { ExperiencePlanRenderer } from "./ExperiencePlanRenderer";
+import { ExperiencePlanRenderer, experienceConfig } from "./ExperiencePlanRenderer";
 import { resolvePreviewEnvironmentId } from "./previewEnvironment";
 
 type PreviewConfiguration = {
@@ -53,8 +53,6 @@ const previewConfiguration = (): PreviewConfiguration | undefined => {
 };
 
 const configuration = previewConfiguration();
-
-const experienceConfig = { components: {} };
 
 const errorMessage = (error: unknown) =>
   error instanceof Error
