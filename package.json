@@ -4,9 +4,8 @@
   "private": true,
   "dependencies": {
     "@contentful/app-sdk": "^4.73.0",
-    "@contentful/experiences-client": "^0.9.3",
-    "@contentful/experiences-live-preview": "0.6.3",
-    "@contentful/experiences-sdk-core": "^0.12.2",
+    "@contentful/experiences-live-preview": "0.6.4",
+    "@contentful/experiences-react": "0.13.5",
     "@contentful/f36-components": "4.58.4",
     "@contentful/f36-icons": "^4.27.0",
     "@contentful/f36-multiselect": "^4.22.0",
@@ -25,9 +24,9 @@
   },
   "scripts": {
     "bootstrap:experience-orchestration": "node scripts/bootstrap-experience-orchestration.mjs",
-    "start": "cross-env GENERATE_SOURCEMAP=false BROWSER=none craco start",
-    "build": "GENERATE_SOURCEMAP=false craco build",
-    "test": "GENERATE_SOURCEMAP=false craco test",
+    "start": "cross-env GENERATE_SOURCEMAP=false BROWSER=none react-scripts start",
+    "build": "GENERATE_SOURCEMAP=false react-scripts build",
+    "test": "GENERATE_SOURCEMAP=false react-scripts test",
     "eject": "react-scripts eject",
     "create-app-definition": "contentful-app-scripts create-app-definition",
     "upload": "contentful-app-scripts upload --bundle-dir ./build",
@@ -50,7 +49,6 @@
   },
   "devDependencies": {
     "@contentful/app-scripts": "1.13.2",
-    "@craco/craco": "^7.1.0",
     "@testing-library/jest-dom": "5.17.0",
     "@testing-library/react": "14.1.2",
     "@tsconfig/create-react-app": "2.0.2",
